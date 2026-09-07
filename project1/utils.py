@@ -33,7 +33,7 @@ def MSE(y_pred, y_test):
 
 # Get R2 score
 def R2Score(y_pred, y_test):
-	return 1 - (np.sum((y_test - y_pred)**2) / np.sum((y_pred - np.mean(y_pred))**2))
+	return 1 - (np.sum((y_test - y_pred)**2) / np.sum((y_test - np.mean(y_test))**2))
 
 
 # Make some object into string

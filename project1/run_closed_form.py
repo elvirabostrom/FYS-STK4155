@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 #num_points = np.array((50, 100, 250, 500))
 num_points = np.array((50, 100))
 noise = 0.1
-degrees = np.arange(0, 4, 1)
+degrees = np.arange(0, 16, 1)
 
 # skalerer ikke OLS pga intervallet x ligger i gjør at høye potenser faktisk blir mindre eller holder seg
 # i samme størrelsesorden
