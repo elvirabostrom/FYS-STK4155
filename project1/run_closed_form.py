@@ -21,7 +21,7 @@ degrees = np.arange(0, 16, 1)
 # exercise a
 for n in num_points:
 	x, y = MakeData(n, noise) # Sample random x and Runge function y(x) with normally distributed noise
-	naming = {"n": n, "noise": noise, "exercise_a": "exercise_a"} # For writing to file
+	naming = {"n": n, "noise": noise, "exercise": "a"} # For writing to file
 	results = []
 	for d in degrees:
 		X = MakeDesignMatrix(x, d)
