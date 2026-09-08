@@ -15,15 +15,19 @@ def MakeData(n, noise):
 	return x, y
 
 
-# Set up design matrix - FASTER HOW?
+# Set up design matrix (excluding intercept)
 def MakeDesignMatrix(x, d):
-    p = d + 1
-    X = np.zeros((len(x), p))
-    X[:, 0] = 1
-    for j in range(1, p):
+    X = np.zeros((len(x), d))
+    for j in range(d):
         for i in range(len(x)):
             X[i, j] = x[i]**j
     return X
+
+
+# Solve closed form regression
+def closedForm(X, y, lamb = 0.0):
+    n, p = X.shape
+    return np.linalg.pinv(X.T @ X + n * lamb * np.eye(p)) @ X.T @ y
 
 
 # Get mean squared error
