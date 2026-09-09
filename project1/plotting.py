@@ -154,5 +154,3 @@ plt.show()
 # -----------------------------------
 # Comparison closed form no resampling
 # -----------------------------------
-
-#print
