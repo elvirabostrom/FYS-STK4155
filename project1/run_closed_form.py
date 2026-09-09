@@ -72,3 +72,39 @@ for n in num_points:
 
 
 
+# exercise c
+# bootstrap
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
