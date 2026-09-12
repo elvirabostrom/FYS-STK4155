@@ -132,7 +132,7 @@ plt.plot(data["lambda"][mask], data["R2"][mask], label = "R2 score", color = "r"
 plt.xlabel("Punishing parameter")
 plt.ylabel("Error")
 plt.title(f"Ridge, n = 100, noise = 0.1")
-plt.xlim(np.min(d), np.max(d))
+plt.xlim(np.min(data["lambda"]), np.max(data["lambda"]))
 plt.legend()
 plt.grid()
 plt.show()
