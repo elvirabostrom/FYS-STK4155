@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd 
 import ast
 import numpy as np
+from matplotlib.ticker import MaxNLocator
 
 
 # Read general .txt or .csv file and return number values in dictionary
@@ -34,19 +35,34 @@ params = data["params"] # array of arrays, different length per row
 mse = data["MSE"]
 r2 = data["R2"]
 
-# MSE and R2
+# MSE
+plt.figure(figsize=(3.7, 2.8))
 plt.plot(d, mse, label = "MSE", color = "b")
-plt.plot(d, r2, label = "R2 score", color = "r")
-plt.legend()
-plt.xlabel("Polynomial degree")
-plt.ylabel("Error")
-plt.title("OLS, n = 100, noise = 0.1")
+plt.xlabel(r"Polynomial degree $(d)$")
+plt.ylabel("Mean Squared Error")
+#plt.title("OLS, n = 100, noise = 0.1")
 plt.grid()
 plt.xlim(np.min(d), np.max(d))
+plt.tight_layout()
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.savefig("figures/n=100_noise=0.1_exercise=a_MSE_OLS.pdf", bbox_inches='tight')
+plt.show()
+
+# R2
+plt.figure(figsize=(3.7, 2.8))
+plt.plot(d, r2, label = "R2 score", color = "r")
+plt.xlabel(r"Polynomial degree $(d)$")
+plt.ylabel(r"R$^2$ score")
+#plt.title("OLS, n = 100, noise = 0.1")
+plt.grid()
+plt.xlim(np.min(d), np.max(d))
+plt.tight_layout()
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.savefig("figures/n=100_noise=0.1_exercise=a_R2_OLS.pdf", bbox_inches='tight')
 plt.show()
 
 # Params
-# showing how params grow large with OLS as the model overfits at high variance
+# Showing how params grow large with OLS as the model overfits at high variance
 norms = [np.linalg.norm(theta) for theta in params]
 plt.plot(d, norms, color = "k")
 plt.xlabel("Polynomial degree")
@@ -55,13 +71,11 @@ plt.title("Parameternorms, OLS, n = 100, noise = 0.1")
 plt.xlim(np.min(d), np.max(d))
 plt.grid()
 plt.show()
-
-# heatmap
+# Heatmap of params
 max_len = max(len(theta) for theta in params)
 matrix = np.full((len(d), max_len), np.nan)
 for i, theta in enumerate(params):
     matrix[i, :len(theta)] = theta
-
 plt.imshow(matrix, aspect="auto", cmap="coolwarm")
 plt.xlabel("Coefficient index")
 plt.ylabel("Polynomial degree")
