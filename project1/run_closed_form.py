@@ -121,7 +121,7 @@ bootstrap_its = 100
 
 # Part d
 from sklearn.model_selection import KFold, cross_val_score
-
+from sklearn.linear_model import Ridge
 
 def CrossValidationOLS(num_points, noise, degrees):
 # OLS, compute and save MSE using k-fold cross-validation
