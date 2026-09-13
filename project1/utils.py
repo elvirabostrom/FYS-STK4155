@@ -25,7 +25,7 @@ def MakeDesignMatrix(x, d):
 
 
 # Solve closed form regression
-def closedForm(X, y, lamb = 0.0):
+def ClosedForm(X, y, lamb = 0.0):
     n, p = X.shape
     return np.linalg.pinv(X.T @ X + n * lamb * np.eye(p)) @ X.T @ y
 
@@ -38,6 +38,50 @@ def MSE(y_pred, y_test):
 # Get R2 score
 def R2Score(y_pred, y_test):
 	return 1 - (np.sum((y_test - y_pred)**2) / np.sum((y_test - np.mean(y_test))**2))
+
+
+# Analytic Gradients
+def GradOLSAnalytic(theta, X, y):
+    n = len(y)
+    return (2.0 / n) * X.T @ (X @ theta - y)
+def GradRidgeAnalytic(theta, X, y, lamb):
+    return GradOLSAnalytic(theta, X, y) + 2.0 * lamb * theta
+
+
+# Cost functions
+def CostOLS(theta, X, y):
+    return jnp.mean((y - X @ theta) ** 2)
+def CostRidge(theta, X, y, lamb):
+    return jnp.mean((y - X @ theta) ** 2) + lamb * jnp.sum(theta**2)
+
+
+# Gradient Descent
+def GradientDescent(
+    X,
+    y,
+    grad_func,
+    theta_init,
+    eta,
+    max_iter=10000,
+    tol=1e-8,
+    lamb=None,
+):
+    theta = theta_init.copy()
+    for i in range(max_iter):
+        if lamb is not None:
+            g = grad_func(theta, X, y, lamb)
+        else:
+            g = grad_func(theta, X, y)
+
+        theta_next = theta - eta * g
+
+        # Convergence check: change in parameter vector
+        if np.linalg.norm(theta_next - theta) < tol:
+            return theta_next, i + 1
+
+        theta = theta_next
+
+    return theta, max_iter
 
 
 # Make some object into string
@@ -67,3 +111,25 @@ def writeToFile(naming, results):
 	    	line = "\t".join(formatValue(row[key]) for key in keys)
 	    	file.write(line + "\n")
 
+
+def writeToFile_by_folder(naming, results):
+    # Extract exercise name for the directory structure
+    ex_folder = f"exercise={naming.get('exercise', 'e')}"
+    results_dir = Path("results") / ex_folder
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    # Omit 'exercise' key from the filename since it's now in the folder path
+    file_naming = {k: v for k, v in naming.items() if k != "exercise"}
+    filename = (
+        "_".join(f"{key}={value}" for key, value in file_naming.items())
+        + "_results.txt"
+    )
+    filepath = results_dir / filename
+
+    keys = list(results[0].keys())
+
+    with open(filepath, "w", encoding="utf-8") as file:
+        file.write("\t".join(keys) + "\n")
+        for row in results:
+            line = "\t".join(formatValue(row[key]) for key in keys)
+            file.write(line + "\n")
