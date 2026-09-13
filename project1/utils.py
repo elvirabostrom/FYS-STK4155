@@ -29,12 +29,15 @@ def MakeDesignMatrix(x, d):
     return X
 
 
-# Scale X, center y
+# Standardize X, center y
 def scaleData(X_train, X_test, y_train):
-	scaler = StandardScaler()
-	X_train_scaled = scaler.fit_transform(X_train) # Scale
-	X_test_scaled = scaler.transform(X_test) # Scale
-	y_train_centered = y_train - y_train.mean() # Center
+	x_mean = np.mean(X_train, axis = 0)
+	x_std = np.std(X_train, axis = 0)
+
+	X_train_scaled = ( X_train - x_mean ) / x_std
+	X_test_scaled = ( X_test - x_mean ) / x_std
+	y_train_centered = y_train - y_train.mean()
+	
 	return X_train_scaled, X_test_scaled, y_train_centered
 
 
