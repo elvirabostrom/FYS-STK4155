@@ -135,6 +135,7 @@ def formatValue(value):
         return str(value)
 
 
+"""
 # Write results to file
 # Partly Claude w/ prompt "how to put resulting files in a folder which is in the same folder as the function file"
 def writeToFile(naming, results):
@@ -149,16 +150,18 @@ def writeToFile(naming, results):
 	    for row in results: # Write results to file
 	    	line = "\t".join(formatValue(row[key]) for key in keys)
 	    	file.write(line + "\n")
+"""
 
 
-def writeToFile_by_folder(naming, results):
-    # Extract exercise name for the directory structure
-    ex_folder = f"exercise={naming.get('exercise', 'e')}"
-    results_dir = Path("results") / ex_folder
+def writeToFile(naming, results):
+    part = naming.get("part", naming.get("exercise", "e"))
+
+    results_dir = Path("results") / f"part={part}"
     results_dir.mkdir(parents=True, exist_ok=True)
 
-    # Omit 'exercise' key from the filename since it's now in the folder path
-    file_naming = {k: v for k, v in naming.items() if k != "exercise"}
+    file_naming = {
+        k: v for k, v in naming.items() if k not in ("part", "exercise")
+    }
     filename = (
         "_".join(f"{key}={value}" for key, value in file_naming.items())
         + "_results.txt"

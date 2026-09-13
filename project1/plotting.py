@@ -3,7 +3,9 @@ import pandas as pd
 import ast
 import numpy as np
 from matplotlib.ticker import MaxNLocator
+from pathlib import Path
 
+Path("figures").mkdir(parents=True, exist_ok=True)
 
 # Read general .txt or .csv file and return number values in dictionary
 def readResultsFile(filename):
@@ -17,7 +19,6 @@ def readResultsFile(filename):
             data[col] = df[col].to_numpy()
     return data
 
-
 # 
 # --------------------------------------------------------------------
 # CLOSED FORM
@@ -28,7 +29,7 @@ def readResultsFile(filename):
 # OLS closed form no resampling
 # -----------------------------------
 
-data = readResultsFile("results/n=100_noise=0.1_exercise=a_results.txt")
+data = readResultsFile("results/part=a/n=100_noise=0.1_results.txt")
 
 d = data["d"]
 params = data["params"] # array of arrays, different length per row
@@ -72,7 +73,7 @@ plt.grid()
 plt.tight_layout()
 plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.savefig("figures/n=100_noise=0.1_exercise=a_param_norm_OLS.pdf", bbox_inches='tight')
-plt.show()
+#plt.show()
 # Heatmap of params
 max_len = max(len(theta) for theta in params)
 matrix = np.full((len(d), max_len), np.nan)
@@ -88,8 +89,10 @@ plt.xticks(ticks=np.arange(len(d))[::2], labels=d[::2])
 plt.colorbar(label=r"Coefficient value")
 plt.tight_layout()
 plt.savefig("figures/n=100_noise=0.1_exercise=a_param_heatmap_OLS.pdf", bbox_inches='tight')
-plt.show()
+#plt.show()
 
+# Temporarily commented out because of missing files. Uncomment when the files are available.
+"""
 # Noise and n analysis
 noises = [0.05, 0.1, 0.3]
 ns = [50, 100, 250, 500]
@@ -99,7 +102,7 @@ tables = {}
 for noise in noises:
     table = np.full((len(chosen_d), len(ns)), np.nan)
     for col, n in enumerate(ns):
-        filename = f"results/n={n}_noise={noise}_exercise=a_results.txt"
+        filename = f"results/part=a/n={n}_noise={noise}_results.txt"
         data = readResultsFile(filename)
         for row, d in enumerate(chosen_d):
             mask = data["d"] == d
@@ -112,13 +115,13 @@ for noise, table in tables.items():
     print(header)
     for d, row in zip(chosen_d, table):
         print(f"{d:<6}" + "".join(f"{val:>10.4g}" for val in row))
-
+"""
 
 # -----------------------------------
 # Ridge closed form no resampling
 # -----------------------------------
 
-data = readResultsFile("results/n=100_noise=0.1_exercise=b_results.txt")
+data = readResultsFile("results/part=b/n=100_noise=0.1_results.txt")
 
 lamb = data["lambda"]
 d = data["d"]
@@ -138,7 +141,7 @@ plt.legend()
 plt.title("Ridge, n = 100, noise = 0.1")
 plt.xlim(np.min(d), np.max(d))
 plt.grid()
-plt.show()
+#plt.show()
 
 #R2 with fixed lambda
 for lamb in np.unique(data["lambda"]):
@@ -151,7 +154,7 @@ plt.legend()
 plt.title("Ridge, n = 100, noise = 0.1")
 plt.xlim(np.min(d), np.max(d))
 plt.grid()
-plt.show()
+#plt.show()
 
 #MSE and R2 varying with d
 chosen_lambda = 0.1
@@ -165,7 +168,7 @@ plt.title(f"Ridge, n = 100, noise = 0.1")
 plt.xlim(np.min(d), np.max(d))
 plt.legend()
 plt.grid()
-plt.show()
+#plt.show()
 
 
 #MSE and R2 varying with lambda
@@ -180,7 +183,7 @@ plt.title(f"Ridge, n = 100, noise = 0.1")
 plt.xlim(np.min(data["lambda"]), np.max(data["lambda"]))
 plt.legend()
 plt.grid()
-plt.show()
+#plt.show()
 
 
 # Params
@@ -193,9 +196,133 @@ plt.ylabel("Two norm of parameter set")
 plt.title("Parameternorms, Ridge, n = 100, noise = 0.1")
 plt.xlim(np.min(d), np.max(d))
 plt.grid()
-plt.show()
+#plt.show()
 
 
 # -----------------------------------
 # Comparison closed form no resampling
 # -----------------------------------
+
+
+
+
+
+
+# --------------------------------------------------------------------
+# Gradient Descent vs Closed Form Benchmarks (Part E)
+# --------------------------------------------------------------------
+
+# 1. Load Part E (Gradient Descent) Data
+data_e = readResultsFile("results/part=e/n=100_noise=0.1_results.txt")
+
+# Set the hyperparameter value for Ridge filtering
+chosen_lambda = 0.1
+
+# Filter GD data for OLS and Ridge
+ols_mask = data_e["model"] == "OLS"
+ridge_mask = (data_e["model"] == "Ridge") & np.isclose(
+    data_e["lambda"], chosen_lambda
+)
+
+# Extract Gradient Descent arrays (fixes NameError)
+d_ols = data_e["d"][ols_mask]
+mse_ols = data_e["MSE"][ols_mask]
+r2_ols = data_e["R2"][ols_mask]
+
+d_ridge = data_e["d"][ridge_mask]
+mse_ridge = data_e["MSE"][ridge_mask]
+r2_ridge = data_e["R2"][ridge_mask]
+
+# 2. Load Closed-Form Benchmarks (Parts A and B)
+data_a = readResultsFile("results/part=a/n=100_noise=0.1_results.txt")
+data_b = readResultsFile("results/part=b/n=100_noise=0.1_results.txt")
+
+# Extract Closed-Form OLS arrays
+d_cf_ols = data_a["d"]
+mse_cf_ols = data_a["MSE"]
+r2_cf_ols = data_a["R2"]
+
+# Extract Closed-Form Ridge arrays
+mask_b = np.isclose(data_b["lambda"], chosen_lambda)
+d_cf_ridge = data_b["d"][mask_b]
+mse_cf_ridge = data_b["MSE"][mask_b]
+r2_cf_ridge = data_b["R2"][mask_b]
+
+
+# --------------------------------------------------------------------
+# PLOTTING
+# --------------------------------------------------------------------
+
+# 1. OLS MSE Comparison
+plt.figure(figsize=(3.7, 2.8))
+plt.plot(d_cf_ols, mse_cf_ols, label="Closed form")
+plt.plot(
+    d_ols, mse_ols, label="Gradient descent"
+)
+plt.xlabel(r"Polynomial degree $(d)$")
+plt.ylabel("Mean Squared Error")
+plt.grid(True)
+plt.xlim(np.min(d_ols), np.max(d_ols))
+plt.legend()
+plt.tight_layout()
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.savefig("figures/part=e_OLS_CF_vs_GD_MSE.png", bbox_inches="tight")
+plt.close()
+
+# 2. OLS R2 Comparison
+plt.figure(figsize=(3.7, 2.8))
+plt.plot(d_cf_ols, r2_cf_ols, label="Closed form")
+plt.plot(d_ols, r2_ols, label="Gradient descent")
+plt.xlabel(r"Polynomial degree $(d)$")
+plt.ylabel(r"R$^2$ score")
+plt.grid(True)
+plt.xlim(np.min(d_ols), np.max(d_ols))
+plt.legend()
+plt.tight_layout()
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.savefig("figures/part=e_OLS_CF_vs_GD_R2.png", bbox_inches="tight")
+plt.close()
+
+# 3. Ridge MSE Comparison
+plt.figure(figsize=(3.7, 2.8))
+plt.plot(
+    d_cf_ridge,
+    mse_cf_ridge,
+    label=f"Closed form",
+)
+plt.plot(
+    d_ridge,
+    mse_ridge,
+    label=f"Gradient descent",
+)
+plt.xlabel(r"Polynomial degree $(d)$")
+plt.ylabel("Mean Squared Error")
+plt.grid(True)
+plt.xlim(np.min(d_ridge), np.max(d_ridge))
+plt.legend()
+plt.tight_layout()
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.savefig("figures/part=e_Ridge_CF_vs_GD_MSE.png", bbox_inches="tight")
+plt.close()
+
+# 4. Ridge R2 Comparison
+plt.figure(figsize=(3.7, 2.8))
+plt.plot(
+    d_cf_ridge,
+    r2_cf_ridge,
+    label=f"Closed form",
+)
+plt.plot(
+    d_ridge,
+    r2_ridge,
+    label=f"Gradient descent",
+)
+plt.xlabel(r"Polynomial degree $(d)$")
+plt.ylabel(r"R$^2$ score")
+plt.grid(True)
+plt.xlim(np.min(d_ridge), np.max(d_ridge))
+plt.legend()
+plt.tight_layout()
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.savefig("figures/part=e_Ridge_CF_vs_GD_R2.png", bbox_inches="tight")
+plt.close()

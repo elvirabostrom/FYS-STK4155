@@ -133,4 +133,4 @@ for n in num_points:
                 }
             )
 
-    writeToFile_by_folder(naming, results)
+    writeToFile(naming, results)

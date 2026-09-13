@@ -67,7 +67,7 @@ def plainRidge(num_points, noise, degrees, punishers):
 
 n_punishers = 10
 punishers = np.logspace(-1, 10, n_punishers)
-#plainRidge(num_points, noise, degrees, punishers)
+plainRidge(num_points, noise, degrees, punishers)
 
 
 def TrainTestErr(num_points, noise, degrees):
