@@ -1,4 +1,5 @@
 import numpy as np
+import jax.numpy as jnp
 from pathlib import Path
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.model_selection import train_test_split
@@ -42,7 +43,7 @@ def scaleData(X_train, X_test, y_train):
 
 
 # Solve closed form regression
-def ClosedForm(X, y, lamb = 0.0):
+def closedForm(X, y, lamb = 0.0):
     n, p = X.shape
     return np.linalg.pinv(X.T @ X + n * lamb * np.eye(p)) @ X.T @ y
 
@@ -57,7 +58,6 @@ def R2Score(y_pred, y_test):
 	return 1 - (np.sum((y_test - y_pred)**2) / np.sum((y_test - np.mean(y_test))**2))
 
 
-<<<<<<< HEAD
 # Analytic Gradients
 def GradOLSAnalytic(theta, X, y):
     n = len(y)
@@ -100,7 +100,6 @@ def GradientDescent(
         theta = theta_next
 
     return theta, max_iter
-=======
 # Complete bootstrap resampling for calculating MSE, bias, variance, for varying polynomial degree
 # Only OLS
 def bootStrap(x, y, degrees, iterations):
@@ -122,7 +121,6 @@ def bootStrap(x, y, degrees, iterations):
 	    var[j] = np.mean((np.mean(y_pred, axis = 1, keepdims = True) - y_pred)**2)
 
 	return err, biasSquared, var
->>>>>>> b45cc883ffa46bfa03a2e80eb7d19a096d66b4e8
 
 
 # Make some object into string

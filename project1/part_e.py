@@ -10,8 +10,8 @@ from utils import *
 jax.config.update("jax_enable_x64", True)
 
 
-grad_ols_ad = jax.grad(CostOLS)
-grad_ridge_ad = jax.grad(CostRidge)
+GradOLSad = jax.grad(CostOLS)
+GradRidgead = jax.grad(CostRidge)
 
 
 num_points = np.array((50, 100, 250, 500))
@@ -48,18 +48,18 @@ for n in num_points:
         eta_ols = 0.5 * eta_max_ols
 
         params_ols_cf = closedForm(X_train_scaled, y_train_centered)
-        params_ols_gd, iters_ols = gradient_descent(
+        params_ols_gd, iters_ols = GradientDescent(
             X_train_scaled,
             y_train_centered,
-            grad_ols_analytic,
+            GradOLSAnalytic,
             theta_init,
             eta=eta_ols,
         )
 
         ad_diff_ols = np.max(
             np.abs(
-                grad_ols_ad(theta_init, X_train_scaled, y_train_centered)
-                - grad_ols_analytic(
+                GradOLSad(theta_init, X_train_scaled, y_train_centered)
+                - GradOLSAnalytic(
                     theta_init, X_train_scaled, y_train_centered
                 )
             )
@@ -97,10 +97,10 @@ for n in num_points:
             params_ridge_cf = closedForm(
                 X_train_scaled, y_train_centered, lamb
             )
-            params_ridge_gd, iters_ridge = gradient_descent(
+            params_ridge_gd, iters_ridge = GradientDescent(
                 X_train_scaled,
                 y_train_centered,
-                grad_ridge_analytic,
+                GradRidgeAnalytic,
                 theta_init,
                 eta=eta_ridge,
                 lamb=lamb,
@@ -108,12 +108,8 @@ for n in num_points:
 
             ad_diff_ridge = np.max(
                 np.abs(
-                    grad_ridge_ad(
-                        theta_init, X_train_scaled, y_train_centered, lamb
-                    )
-                    - grad_ridge_analytic(
-                        theta_init, X_train_scaled, y_train_centered, lamb
-                    )
+                    GradRidgead(theta_init, X_train_scaled, y_train_centered, lamb)
+                    - GradRidgeAnalytic(theta_init, X_train_scaled, y_train_centered, lamb)
                 )
             )
 
