@@ -119,30 +119,93 @@ bootstrap_its = 100
 
 
 
+# Part d
+from sklearn.model_selection import KFold, cross_val_score
 
 
+def CrossValidationOLS(num_points, noise, degrees):
+# OLS, compute and save MSE using k-fold cross-validation
+    for n in num_points:
+        x, y = MakeData(n, noise, seed + n)
+        x = x.reshape(-1, 1)
+
+        naming = {"n": n, "noise": noise, "exercise": "d_OLS"}
+        results = []
+
+        # Test 5-fold and 10-fold cross-validation
+        for k in [5, 10]:
+            kfold = KFold(n_splits=k, shuffle=True, random_state=2026)
+
+            for d in degrees:
+                # OLS model
+                model = make_pipeline(
+                    PolynomialFeatures(degree=d, include_bias=False),
+                    StandardScaler(),
+                    LinearRegression(fit_intercept=True)
+                )
+
+                # Cross-validation
+                scores = -cross_val_score(
+                    model,
+                    x,
+                    y,
+                    cv=kfold,
+                    scoring="neg_mean_squared_error"
+                )
+
+                mse = np.mean(scores)
+
+                results.append({
+                    "k": k,
+                    "d": d,
+                    "MSE": mse
+                })
+
+        writeToFile(naming, results)
 
 
+def CrossValidationRidge(num_points, noise, degrees, punishers):
+# Ridge, compute and save MSE using k-fold cross-validation
+    for n in num_points:
+        x, y = MakeData(n, noise, seed + n)
+        x = x.reshape(-1, 1)
+
+        naming = {"n": n, "noise": noise, "exercise": "d_Ridge"}
+        results = []
+
+        # Test 5-fold and 10-fold cross-validation
+        for k in [5, 10]:
+            kfold = KFold(n_splits=k, shuffle=True, random_state=2026)
+
+            for d in degrees:
+                for lamb in punishers:
+                    # Ridge model
+                    model = make_pipeline(
+                        PolynomialFeatures(degree=d, include_bias=False),
+                        StandardScaler(),
+                        Ridge(alpha=lamb)
+                    )
+
+                    # Cross-validation
+                    scores = -cross_val_score(
+                        model,
+                        x,
+                        y,
+                        cv=kfold,
+                        scoring="neg_mean_squared_error"
+                    )
+
+                    mse = np.mean(scores)
+
+                    results.append({
+                        "k": k,
+                        "d": d,
+                        "lambda": lamb,
+                        "MSE": mse
+                    })
+
+        writeToFile(naming, results)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+CrossValidationOLS(num_points, noise, degrees)
+CrossValidationRidge(num_points, noise, degrees, punishers)
