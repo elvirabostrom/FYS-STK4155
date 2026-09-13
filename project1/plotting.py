@@ -81,14 +81,37 @@ for i, theta in enumerate(params):
 plt.figure(figsize=(3.7, 2.8))
 plt.imshow(matrix.T, aspect="auto", cmap="coolwarm")
 plt.xlabel(r"Polynomial degree $(d)$")
-plt.ylabel("Coefficient index")
+plt.ylabel(r"Coefficient index $(\theta_i)$")
 y_labels = np.arange(1, matrix.shape[1] + 1)
 plt.yticks(ticks=np.arange(matrix.shape[1])[::2], labels=y_labels[::2])
 plt.xticks(ticks=np.arange(len(d))[::2], labels=d[::2])
-plt.colorbar(label=r"Coefficient value $(\theta_i)$")
+plt.colorbar(label=r"Coefficient value")
 plt.tight_layout()
 plt.savefig("figures/n=100_noise=0.1_exercise=a_param_heatmap_OLS.pdf", bbox_inches='tight')
 plt.show()
+
+# Noise and n analysis
+noises = [0.05, 0.1, 0.3]
+ns = [50, 100, 250, 500]
+chosen_d = [1, 3, 6, 8, 10, 11, 12, 13, 14, 15]
+# Structure: table[noise][d][n] = MSE
+tables = {}
+for noise in noises:
+    table = np.full((len(chosen_d), len(ns)), np.nan)
+    for col, n in enumerate(ns):
+        filename = f"results/n={n}_noise={noise}_exercise=a_results.txt"
+        data = readResultsFile(filename)
+        for row, d in enumerate(chosen_d):
+            mask = data["d"] == d
+            table[row, col] = data["MSE"][mask][0]  # one match per d
+    tables[noise] = table
+# Check
+for noise, table in tables.items():
+    print(f"\nNoise = {noise}")
+    header = "d\\n".ljust(6) + "".join(f"{n:>10}" for n in ns)
+    print(header)
+    for d, row in zip(chosen_d, table):
+        print(f"{d:<6}" + "".join(f"{val:>10.4g}" for val in row))
 
 
 # -----------------------------------

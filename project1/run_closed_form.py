@@ -67,7 +67,7 @@ def plainRidge(num_points, noise, degrees, punishers):
 
 n_punishers = 10
 punishers = np.logspace(-1, 10, n_punishers)
-plainRidge(num_points, noise, degrees, punishers)
+#plainRidge(num_points, noise, degrees, punishers)
 
 
 def TrainTestErr(num_points, noise, degrees):
@@ -94,7 +94,7 @@ def TrainTestErr(num_points, noise, degrees):
 
 
 num_points = np.array((50, 100, 500))
-TrainTestErr(num_points, noise, degrees)
+#TrainTestErr(num_points, noise, degrees)
 
 
 def BootStrapOLS(num_points, noise, degrees, bootstrap_its):
@@ -114,7 +114,7 @@ def BootStrapOLS(num_points, noise, degrees, bootstrap_its):
 		writeToFile(naming, results)
 
 bootstrap_its = 100
-BootStrapOLS(num_points, noise, degrees, bootstrap_its)
+#BootStrapOLS(num_points, noise, degrees, bootstrap_its)
 
 
 
