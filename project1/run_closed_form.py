@@ -35,7 +35,7 @@ def plainOLS(num_points, noise, degrees):
 		writeToFile(naming, results)
 
 
-plainOLS(num_points, noise, degrees)
+#plainOLS(num_points, noise, degrees)
 
 
 def plainRidge(num_points, noise, degrees, punishers):
@@ -66,8 +66,8 @@ def plainRidge(num_points, noise, degrees, punishers):
 
 
 n_punishers = 10
-punishers = np.logspace(-1, 10, n_punishers)
-#plainRidge(num_points, noise, degrees, punishers)
+punishers = np.logspace(-6, 6, n_punishers)
+plainRidge(num_points, noise, degrees, punishers)
 
 
 def TrainTestErr(num_points, noise, degrees):
