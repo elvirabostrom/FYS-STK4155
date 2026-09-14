@@ -382,3 +382,48 @@ plt.tight_layout()
 plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.savefig("figures/part=e_Ridge_CF_vs_GD_R2.png", bbox_inches="tight")
 plt.close()
+
+
+
+
+
+
+
+# -----------------------------------
+# Part D
+# Cross-validation OLS 
+# -----------------------------------
+
+num_points = [50, 100, 500]
+
+for n in num_points:
+
+    data = readResultsFile(
+        f"results/part=d_OLS/n={n}_noise=0.1_results.txt"
+    )
+
+    k = data["k"]
+    d = data["d"]
+    mse = data["MSE"]
+
+    # MSE
+    plt.figure(figsize=(3.7, 2.8))
+
+    for folds in [5, 10]:
+        mask = k == folds
+        plt.plot(d[mask], mse[mask], label=f"k = {folds}")
+
+    plt.xlabel(r"Polynomial degree $(d)$")
+    plt.ylabel("Mean Squared Error")
+    plt.grid()
+    plt.xlim(np.min(d), np.max(d))
+    plt.legend()
+    plt.tight_layout()
+    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+
+    plt.savefig(
+        f"figures/n={n}_noise=0.1_exercise=d_MSE_OLS_CV.pdf",
+        bbox_inches='tight'
+    )
+
+    plt.show()
