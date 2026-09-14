@@ -139,7 +139,7 @@ plt.xscale("log")
 plt.grid()
 plt.tight_layout()
 plt.savefig("figures/n=100_noise=0.1_exercise=b_MSE_Ridge.pdf", bbox_inches='tight')
-plt.show()
+#plt.show()
 
 plt.figure(figsize=(3.7, 2.8))
 plt.plot(lamb[mask], r2[mask], label = "R2 score", color = "r")
@@ -150,7 +150,7 @@ plt.xscale("log")
 plt.grid()
 plt.tight_layout()
 plt.savefig("figures/n=100_noise=0.1_exercise=b_R2_Ridge.pdf", bbox_inches='tight')
-plt.show()
+#plt.show()
 
 
 #MSE and R2 varying with d
@@ -199,7 +199,7 @@ plt.grid()
 plt.tight_layout()
 plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.savefig("figures/n=100_noise=0.1_exercise=b_param_of_d_Ridge.pdf", bbox_inches='tight')
-plt.show()
+#plt.show()
 # func of lamda
 chosen_degree = 11
 mask = d == chosen_degree
@@ -214,7 +214,7 @@ plt.grid()
 plt.xscale("log")
 plt.tight_layout()
 plt.savefig("figures/n=100_noise=0.1_exercise=b_param_of_lam_Ridge.pdf", bbox_inches='tight')
-plt.show()
+#plt.show()
 
 
 # # MSE with fixed lambda
@@ -259,10 +259,105 @@ plt.show()
 # Comparison closed form no resampling
 # -----------------------------------
 
+# -----------------------------------
+# Part D
+# Cross-validation OLS 
+# -----------------------------------
+
+num_points = [50, 100, 500]
+
+for n in num_points:
+
+    data = readResultsFile(
+        f"results/part=d_OLS/n={n}_noise=0.1_results.txt"
+    )
+
+    k = data["k"]
+    d = data["d"]
+    mse = data["MSE"]
+
+    # MSE
+    plt.figure(figsize=(3.7, 2.8))
+
+    for folds in [5, 10]:
+        mask = k == folds
+        plt.plot(d[mask], mse[mask], label=f"k = {folds}")
+
+    plt.xlabel(r"Polynomial degree $(d)$")
+    plt.ylabel("Mean Squared Error")
+    plt.grid()
+    plt.xlim(np.min(d), np.max(d))
+    plt.legend()
+    plt.tight_layout()
+    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+
+    plt.savefig(
+        f"figures/n={n}_noise=0.1_exercise=d_MSE_OLS_CV.pdf",
+        bbox_inches="tight"
+    )
+
+    plt.show()
 
 
+# -----------------------------------
+# Part D
+# Cross-validation Ridge
+# -----------------------------------
 
+num_points = [50, 100, 500]
+noise = 0.1
 
+for n in num_points:
+
+    data = readResultsFile(
+        f"results/part=d_Ridge/n={n}_noise={noise}_results.txt"
+    )
+
+    k = data["k"]
+    d = data["d"]
+    lamb = data["lambda"]
+    mse = data["MSE"]
+
+    plt.figure(figsize=(5.0, 3.5))
+
+    for lam in np.unique(lamb):
+
+        mask5 = (k == 5) & (lamb == lam)
+        mask10 = (k == 10) & (lamb == lam)
+
+        plt.plot(
+            d[mask5], mse[mask5],
+            label=fr"$\lambda={lam:.1e}$, k=5"
+        )
+
+        plt.plot(
+            d[mask10], mse[mask10],
+            linestyle="--",
+            label=fr"$\lambda={lam:.1e}$, k=10"
+        )
+
+    plt.xlabel(r"Polynomial degree $(d)$")
+    plt.ylabel("Mean Squared Error")
+    plt.grid()
+    plt.xlim(np.min(d), np.max(d))
+
+    # Place legend to the right of the plot
+    plt.legend(
+        fontsize=6,
+        loc="center left",
+        bbox_to_anchor=(1.02, 0.5)
+    )
+
+    plt.tight_layout()
+    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+
+    plt.savefig(
+        f"figures/n={n}_noise={noise}_exercise=d_MSE_Ridge_CV.pdf",
+        bbox_inches="tight"
+    )
+
+    plt.show()
+    
 
 # --------------------------------------------------------------------
 # Gradient Descent vs Closed Form Benchmarks (Part E)
@@ -382,48 +477,3 @@ plt.tight_layout()
 plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.savefig("figures/part=e_Ridge_CF_vs_GD_R2.png", bbox_inches="tight")
 plt.close()
-
-
-
-
-
-
-
-# -----------------------------------
-# Part D
-# Cross-validation OLS 
-# -----------------------------------
-
-num_points = [50, 100, 500]
-
-for n in num_points:
-
-    data = readResultsFile(
-        f"results/part=d_OLS/n={n}_noise=0.1_results.txt"
-    )
-
-    k = data["k"]
-    d = data["d"]
-    mse = data["MSE"]
-
-    # MSE
-    plt.figure(figsize=(3.7, 2.8))
-
-    for folds in [5, 10]:
-        mask = k == folds
-        plt.plot(d[mask], mse[mask], label=f"k = {folds}")
-
-    plt.xlabel(r"Polynomial degree $(d)$")
-    plt.ylabel("Mean Squared Error")
-    plt.grid()
-    plt.xlim(np.min(d), np.max(d))
-    plt.legend()
-    plt.tight_layout()
-    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
-
-    plt.savefig(
-        f"figures/n={n}_noise=0.1_exercise=d_MSE_OLS_CV.pdf",
-        bbox_inches='tight'
-    )
-
-    plt.show()
