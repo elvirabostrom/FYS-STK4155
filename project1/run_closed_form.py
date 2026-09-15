@@ -114,8 +114,9 @@ def BootStrapOLS(num_points, noise, degrees, bootstrap_its):
 		})
 		writeToFile(naming, results)
 
+degrees = np.arange(1, 16, 1)
 bootstrap_its = 100
-#BootStrapOLS(num_points, noise, degrees, bootstrap_its)
+BootStrapOLS(num_points, noise, degrees, bootstrap_its)
 
 
 
