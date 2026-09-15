@@ -260,6 +260,10 @@ plt.savefig("figures/n=100_noise=0.1_exercise=b_param_of_lam_Ridge.pdf", bbox_in
 # -----------------------------------
 
 # -----------------------------------
+# Comparison closed form no resampling
+# -----------------------------------
+
+# -----------------------------------
 # Part D
 # Cross-validation OLS 
 # -----------------------------------
@@ -285,6 +289,7 @@ for n in num_points:
 
     plt.xlabel(r"Polynomial degree $(d)$")
     plt.ylabel("Mean Squared Error")
+    plt.title(f"n = {n}")
     plt.grid()
     plt.xlim(np.min(d), np.max(d))
     plt.legend()
@@ -338,8 +343,8 @@ for n in num_points:
 
     plt.xlabel(r"Polynomial degree $(d)$")
     plt.ylabel("Mean Squared Error")
+    plt.title(f"n = {n}")
     plt.grid()
-    plt.tight_layout()
     plt.xlim(np.min(d), np.max(d))
 
     # Place legend to the right of the plot
@@ -358,6 +363,7 @@ for n in num_points:
     )
 
     #plt.show()
+
     
 
 
