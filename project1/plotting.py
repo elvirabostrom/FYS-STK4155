@@ -331,6 +331,10 @@ plt.show()
 
 
 # -----------------------------------
+# Comparison closed form no resampling
+# -----------------------------------
+
+# -----------------------------------
 # Part D
 # Cross-validation OLS 
 # -----------------------------------
@@ -356,6 +360,7 @@ for n in num_points:
 
     plt.xlabel(r"Polynomial degree $(d)$")
     plt.ylabel("Mean Squared Error")
+    plt.title(f"n = {n}")
     plt.grid()
     plt.xlim(np.min(d), np.max(d))
     plt.legend()
@@ -409,8 +414,8 @@ for n in num_points:
 
     plt.xlabel(r"Polynomial degree $(d)$")
     plt.ylabel("Mean Squared Error")
+    plt.title(f"n = {n}")
     plt.grid()
-    plt.tight_layout()
     plt.xlim(np.min(d), np.max(d))
 
     # Place legend to the right of the plot
@@ -429,6 +434,7 @@ for n in num_points:
     )
 
     #plt.show()
+
     
 
 
