@@ -334,119 +334,111 @@ plt.show()
 # Comparison closed form no resampling
 # -----------------------------------
 
-# -----------------------------------
+
+# --------------------------------------
 # Part D
-# Cross-validation OLS 
-# -----------------------------------
+# Cross-validation OLS
+# --------------------------------------
 
-num_points = [50, 100, 500]
-
-for n in num_points:
-
-    data = readResultsFile(
-        f"results/part=d_OLS/n={n}_noise=0.1_results.txt"
-    )
-
-    k = data["k"]
-    d = data["d"]
-    mse = data["MSE"]
-
-    # MSE
-    plt.figure(figsize=(3.7, 2.8))
-
-    for folds in [5, 10]:
-        mask = k == folds
-        plt.plot(d[mask], mse[mask], label=f"k = {folds}")
-
-    plt.xlabel(r"Polynomial degree $(d)$")
-
-    # Only show y-axis label for n = 50
-    if n == 50:
-        plt.ylabel("Mean Squared Error")
-
-    plt.title(f"n = {n}")
-    plt.grid()
-    plt.xlim(np.min(d), np.max(d))
-    plt.legend()
-    plt.tight_layout()
-    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
-
-    plt.savefig(
-        f"figures/n={n}_noise=0.1_exercise=d_MSE_OLS_CV.pdf",
-        bbox_inches="tight"
-    )
-
-    plt.show()
-
-
-# -----------------------------------
+# --------------------------------------
 # Part D
-# Cross-validation Ridge
-# -----------------------------------
+# Cross-validation OLS
+# --------------------------------------
 
-num_points = [50, 100, 500]
-noise = 0.1
+# n = 50
+data_d = readResultsFile("results/part=d_OLS/n=50_noise=0.1_results.txt")
+print(data_d)
 
-for n in num_points:
+k = data_d["k"]
+d = data_d["d"]
+MSE = data_d["MSE"]
 
-    data = readResultsFile(
-        f"results/part=d_Ridge/n={n}_noise={noise}_results.txt"
-    )
+plt.figure(figsize=(2.5, 2.3))
 
-    k = data["k"]
-    d = data["d"]
-    lamb = data["lambda"]
-    mse = data["MSE"]
+mask5 = k == 5
+mask10 = k == 10
 
-    plt.figure(figsize=(3.7, 2.8))
+plt.plot(d[mask5], MSE[mask5], label="k = 5")
+plt.plot(d[mask10], MSE[mask10], label="k = 10")
 
-    for lam in np.unique(lamb):
+plt.xlabel(r"Polynomial degree $(d)$")
+plt.ylabel("Mean Squared Error")
+plt.xlim(np.min(d), np.max(d))
+plt.title(r"$n = 50$")
+plt.grid()
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.tight_layout()
 
-        mask5 = (k == 5) & (lamb == lam)
-        mask10 = (k == 10) & (lamb == lam)
-
-        plt.plot(
-            d[mask5], mse[mask5],
-            label=fr"$\lambda={lam:.1e}$, k=5"
-        )
-
-        plt.plot(
-            d[mask10], mse[mask10],
-            linestyle="--",
-            label=fr"$\lambda={lam:.1e}$, k=10"
-        )
-
-    plt.xlabel(r"Polynomial degree $(d)$")
-
-    # Only show y-axis label for n = 50
-    if n == 50:
-        plt.ylabel("Mean Squared Error")
-
-    plt.title(f"n = {n}")
-    plt.grid()
-    plt.xlim(np.min(d), np.max(d))
-
-    # Place legend to the right of the plot
-    plt.legend(
-        fontsize=6,
-        loc="center left",
-        bbox_to_anchor=(1.02, 0.5)
-    )
-
-    plt.tight_layout()
-    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
-
-    plt.savefig(
-        f"figures/n={n}_noise={noise}_exercise=d_MSE_Ridge_CV.pdf",
-        bbox_inches="tight"
-    )
-
-    plt.show()
-
-    
+plt.savefig(
+    "figures/n=50_noise=0.1_exercise=d_MSE_OLS_CV.pdf",
+    bbox_inches="tight"
+)
+plt.show()
 
 
+# n = 100
+data_d = readResultsFile("results/part=d_OLS/n=100_noise=0.1_results.txt")
 
+k = data_d["k"]
+d = data_d["d"]
+MSE = data_d["MSE"]
+
+plt.figure(figsize=(2.3, 2.3))
+
+mask5 = k == 5
+mask10 = k == 10
+
+plt.plot(d[mask5], MSE[mask5], label="k = 5")
+plt.plot(d[mask10], MSE[mask10], label="k = 10")
+
+plt.xlabel(r"Polynomial degree $(d)$")
+plt.xlim(np.min(d), np.max(d))
+plt.title(r"$n = 100$")
+plt.grid()
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.tight_layout()
+
+plt.savefig(
+    "figures/n=100_noise=0.1_exercise=d_MSE_OLS_CV.pdf",
+    bbox_inches="tight"
+)
+plt.show()
+
+
+# n = 500
+data_d = readResultsFile("results/part=d_OLS/n=500_noise=0.1_results.txt")
+
+k = data_d["k"]
+d = data_d["d"]
+MSE = data_d["MSE"]
+
+plt.figure(figsize=(3.5, 2.3))
+
+mask5 = k == 5
+mask10 = k == 10
+
+plt.plot(d[mask5], MSE[mask5], label="k = 5")
+plt.plot(d[mask10], MSE[mask10], label="k = 10")
+
+plt.xlabel(r"Polynomial degree $(d)$")
+plt.xlim(np.min(d), np.max(d))
+plt.title(r"$n = 500$")
+plt.grid()
+
+plt.legend(
+    loc="upper left",
+    bbox_to_anchor=(1.02, 1),
+    frameon=False
+)
+
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.tight_layout()
+
+plt.savefig(
+    "figures/n=500_noise=0.1_exercise=d_MSE_OLS_CV.pdf",
+    bbox_inches="tight"
+)
+plt.show()
 
 
 
