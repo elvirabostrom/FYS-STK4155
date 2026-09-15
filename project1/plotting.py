@@ -359,7 +359,11 @@ for n in num_points:
         plt.plot(d[mask], mse[mask], label=f"k = {folds}")
 
     plt.xlabel(r"Polynomial degree $(d)$")
-    plt.ylabel("Mean Squared Error")
+
+    # Only show y-axis label for n = 50
+    if n == 50:
+        plt.ylabel("Mean Squared Error")
+
     plt.title(f"n = {n}")
     plt.grid()
     plt.xlim(np.min(d), np.max(d))
@@ -413,7 +417,11 @@ for n in num_points:
         )
 
     plt.xlabel(r"Polynomial degree $(d)$")
-    plt.ylabel("Mean Squared Error")
+
+    # Only show y-axis label for n = 50
+    if n == 50:
+        plt.ylabel("Mean Squared Error")
+
     plt.title(f"n = {n}")
     plt.grid()
     plt.xlim(np.min(d), np.max(d))
@@ -433,7 +441,7 @@ for n in num_points:
         bbox_inches="tight"
     )
 
-    #plt.show()
+    plt.show()
 
     
 
