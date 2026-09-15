@@ -67,7 +67,7 @@ def plainRidge(num_points, noise, degrees, punishers):
 
 n_punishers = 10
 punishers = np.logspace(-6, 6, n_punishers)
-plainRidge(num_points, noise, degrees, punishers)
+#plainRidge(num_points, noise, degrees, punishers)
 
 
 def TrainTestErr(num_points, noise, degrees):
@@ -87,14 +87,15 @@ def TrainTestErr(num_points, noise, degrees):
 			MSE_train = MSE(y_train, y_pred_train)
 
 			results.append({
+			"d": d,
 			"Test MSE": MSE_test,
 			"Train MSE": MSE_train
 			})
 		writeToFile(naming, results)
 
-
+degrees = np.arange(1, 20, 1)
 num_points = np.array((50, 100, 500))
-#TrainTestErr(num_points, noise, degrees)
+TrainTestErr(num_points, noise, degrees)
 
 
 def BootStrapOLS(num_points, noise, degrees, bootstrap_its):
@@ -207,5 +208,5 @@ def CrossValidationRidge(num_points, noise, degrees, punishers):
         writeToFile(naming, results)
 
 
-CrossValidationOLS(num_points, noise, degrees)
-CrossValidationRidge(num_points, noise, degrees, punishers)
+#CrossValidationOLS(num_points, noise, degrees)
+#CrossValidationRidge(num_points, noise, degrees, punishers)
