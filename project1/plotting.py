@@ -441,7 +441,67 @@ plt.savefig(
 plt.show()
 
 
+# -----------------------------------
+# Part D
+# Cross-validation Ridge
+# -----------------------------------
 
+num_points = [50, 100, 500]
+noise = 0.1
+
+for n in num_points:
+
+    data = readResultsFile(
+        f"results/part=d_Ridge/n={n}_noise={noise}_results.txt"
+    )
+
+    k = data["k"]
+    d = data["d"]
+    lamb = data["lambda"]
+    mse = data["MSE"]
+
+    plt.figure(figsize=(3.7, 2.8))
+
+    for lam in np.unique(lamb):
+
+        mask5 = (k == 5) & (lamb == lam)
+        mask10 = (k == 10) & (lamb == lam)
+
+        plt.plot(
+            d[mask5], mse[mask5],
+            label=fr"$\lambda={lam:.1e}$, k=5"
+        )
+
+        plt.plot(
+            d[mask10], mse[mask10],
+            linestyle="--",
+            label=fr"$\lambda={lam:.1e}$, k=10"
+        )
+
+    plt.xlabel(r"Polynomial degree $(d)$")
+    plt.ylabel("Mean Squared Error")
+    plt.title(f"n = {n}")
+    plt.grid()
+    plt.xlim(np.min(d), np.max(d))
+
+    # Place legend to the right of the plot
+    plt.legend(
+        fontsize=6,
+        loc="center left",
+        bbox_to_anchor=(1.02, 0.5)
+    )
+
+    plt.tight_layout()
+    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+
+    plt.savefig(
+        f"figures/n={n}_noise={noise}_exercise=d_MSE_Ridge_CV.pdf",
+        bbox_inches="tight"
+    )
+
+    # plt.show()
+
+    
 
 # --------------------------------------------------------------------
 # Gradient Descent vs Closed Form Benchmarks (Part E)
