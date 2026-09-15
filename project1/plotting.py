@@ -318,7 +318,7 @@ for n in num_points:
     lamb = data["lambda"]
     mse = data["MSE"]
 
-    plt.figure(figsize=(5.0, 3.5))
+    plt.figure(figsize=(3.7, 2.8))
 
     for lam in np.unique(lamb):
 
@@ -339,6 +339,7 @@ for n in num_points:
     plt.xlabel(r"Polynomial degree $(d)$")
     plt.ylabel("Mean Squared Error")
     plt.grid()
+    plt.tight_layout()
     plt.xlim(np.min(d), np.max(d))
 
     # Place legend to the right of the plot
@@ -356,8 +357,14 @@ for n in num_points:
         bbox_inches="tight"
     )
 
-    plt.show()
+    #plt.show()
     
+
+
+
+
+
+
 
 # --------------------------------------------------------------------
 # Gradient Descent vs Closed Form Benchmarks (Part E)
