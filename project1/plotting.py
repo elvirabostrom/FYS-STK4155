@@ -209,10 +209,10 @@ plt.grid()
 
 
 # --------------------------------------------------------------------
-# Gradient Descent vs Closed Form Benchmarks (Part E)
+# Gradient descent vs closed form benchmarks (part e)
 # --------------------------------------------------------------------
 
-# 1. Load Part E (Gradient Descent) Data
+# Load part e (gradient descent) data
 data_e = readResultsFile("results/part=e/n=100_noise=0.1_results.txt")
 
 # Set the hyperparameter value for Ridge filtering
@@ -224,7 +224,7 @@ ridge_mask = (data_e["model"] == "Ridge") & np.isclose(
     data_e["lambda"], chosen_lambda
 )
 
-# Extract Gradient Descent arrays (fixes NameError)
+# Extract Ggadient descent arrays
 d_ols = data_e["d"][ols_mask]
 mse_ols = data_e["MSE"][ols_mask]
 r2_ols = data_e["R2"][ols_mask]
@@ -233,16 +233,16 @@ d_ridge = data_e["d"][ridge_mask]
 mse_ridge = data_e["MSE"][ridge_mask]
 r2_ridge = data_e["R2"][ridge_mask]
 
-# 2. Load Closed-Form Benchmarks (Parts A and B)
+# Load parts a and b (closed form) data
 data_a = readResultsFile("results/part=a/n=100_noise=0.1_results.txt")
 data_b = readResultsFile("results/part=b/n=100_noise=0.1_results.txt")
 
-# Extract Closed-Form OLS arrays
+# Extract closed-form OLS arrays
 d_cf_ols = data_a["d"]
 mse_cf_ols = data_a["MSE"]
 r2_cf_ols = data_a["R2"]
 
-# Extract Closed-Form Ridge arrays
+# Extract closed-form ridge arrays
 mask_b = np.isclose(data_b["lambda"], chosen_lambda)
 d_cf_ridge = data_b["d"][mask_b]
 mse_cf_ridge = data_b["MSE"][mask_b]
@@ -250,10 +250,10 @@ r2_cf_ridge = data_b["R2"][mask_b]
 
 
 # --------------------------------------------------------------------
-# PLOTTING
+# Plots
 # --------------------------------------------------------------------
 
-# 1. OLS MSE Comparison
+# 1. OLS MSE comparison
 plt.figure(figsize=(3.7, 2.8))
 plt.plot(d_cf_ols, mse_cf_ols, label="Closed form")
 plt.plot(
@@ -266,10 +266,10 @@ plt.xlim(np.min(d_ols), np.max(d_ols))
 plt.legend()
 plt.tight_layout()
 plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
-plt.savefig("figures/part=e_OLS_CF_vs_GD_MSE.png", bbox_inches="tight")
+plt.savefig("figures/part=e_OLS_CF_vs_GD_MSE.pdf", bbox_inches="tight")
 plt.close()
 
-# 2. OLS R2 Comparison
+# 2. OLS R2 comparison
 plt.figure(figsize=(3.7, 2.8))
 plt.plot(d_cf_ols, r2_cf_ols, label="Closed form")
 plt.plot(d_ols, r2_ols, label="Gradient descent")
@@ -280,10 +280,10 @@ plt.xlim(np.min(d_ols), np.max(d_ols))
 plt.legend()
 plt.tight_layout()
 plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
-plt.savefig("figures/part=e_OLS_CF_vs_GD_R2.png", bbox_inches="tight")
+plt.savefig("figures/part=e_OLS_CF_vs_GD_R2.pdf", bbox_inches="tight")
 plt.close()
 
-# 3. Ridge MSE Comparison
+# 3. Ridge MSE comparison
 plt.figure(figsize=(3.7, 2.8))
 plt.plot(
     d_cf_ridge,
@@ -302,10 +302,10 @@ plt.xlim(np.min(d_ridge), np.max(d_ridge))
 plt.legend()
 plt.tight_layout()
 plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
-plt.savefig("figures/part=e_Ridge_CF_vs_GD_MSE.png", bbox_inches="tight")
+plt.savefig("figures/part=e_Ridge_CF_vs_GD_MSE.pdf", bbox_inches="tight")
 plt.close()
 
-# 4. Ridge R2 Comparison
+# 4. Ridge R2 comparison
 plt.figure(figsize=(3.7, 2.8))
 plt.plot(
     d_cf_ridge,
@@ -324,5 +324,5 @@ plt.xlim(np.min(d_ridge), np.max(d_ridge))
 plt.legend()
 plt.tight_layout()
 plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
-plt.savefig("figures/part=e_Ridge_CF_vs_GD_R2.png", bbox_inches="tight")
+plt.savefig("figures/part=e_Ridge_CF_vs_GD_R2.pdf", bbox_inches="tight")
 plt.close()
