@@ -35,7 +35,7 @@ def plainOLS(num_points, noise, degrees):
 		writeToFile(naming, results)
 
 
-plainOLS(num_points, noise, degrees)
+#plainOLS(num_points, noise, degrees)
 
 
 def plainRidge(num_points, noise, degrees, punishers):
@@ -66,8 +66,8 @@ def plainRidge(num_points, noise, degrees, punishers):
 
 
 n_punishers = 10
-punishers = np.logspace(-1, 10, n_punishers)
-plainRidge(num_points, noise, degrees, punishers)
+punishers = np.logspace(-6, 6, n_punishers)
+#plainRidge(num_points, noise, degrees, punishers)
 
 
 def TrainTestErr(num_points, noise, degrees):
@@ -87,14 +87,15 @@ def TrainTestErr(num_points, noise, degrees):
 			MSE_train = MSE(y_train, y_pred_train)
 
 			results.append({
+			"d": d,
 			"Test MSE": MSE_test,
 			"Train MSE": MSE_train
 			})
 		writeToFile(naming, results)
 
-
+degrees = np.arange(1, 20, 1)
 num_points = np.array((50, 100, 500))
-#TrainTestErr(num_points, noise, degrees)
+TrainTestErr(num_points, noise, degrees)
 
 
 def BootStrapOLS(num_points, noise, degrees, bootstrap_its):
@@ -113,36 +114,100 @@ def BootStrapOLS(num_points, noise, degrees, bootstrap_its):
 		})
 		writeToFile(naming, results)
 
+degrees = np.arange(1, 16, 1)
 bootstrap_its = 100
-#BootStrapOLS(num_points, noise, degrees, bootstrap_its)
+BootStrapOLS(num_points, noise, degrees, bootstrap_its)
 
 
 
 
+# Part d
+from sklearn.model_selection import KFold, cross_val_score
+from sklearn.linear_model import Ridge
+
+def CrossValidationOLS(num_points, noise, degrees):
+# OLS, compute and save MSE using k-fold cross-validation
+    for n in num_points:
+        x, y = MakeData(n, noise, seed + n)
+        x = x.reshape(-1, 1)
+
+        naming = {"n": n, "noise": noise, "exercise": "d_OLS"}
+        results = []
+
+        # Test 5-fold and 10-fold cross-validation
+        for k in [5, 10]:
+            kfold = KFold(n_splits=k, shuffle=True, random_state=2026)
+
+            for d in degrees:
+                # OLS model
+                model = make_pipeline(
+                    PolynomialFeatures(degree=d, include_bias=False),
+                    StandardScaler(),
+                    LinearRegression(fit_intercept=True)
+                )
+
+                # Cross-validation
+                scores = -cross_val_score(
+                    model,
+                    x,
+                    y,
+                    cv=kfold,
+                    scoring="neg_mean_squared_error"
+                )
+
+                mse = np.mean(scores)
+
+                results.append({
+                    "k": k,
+                    "d": d,
+                    "MSE": mse
+                })
+
+        writeToFile(naming, results)
 
 
+def CrossValidationRidge(num_points, noise, degrees, punishers):
+# Ridge, compute and save MSE using k-fold cross-validation
+    for n in num_points:
+        x, y = MakeData(n, noise, seed + n)
+        x = x.reshape(-1, 1)
+
+        naming = {"n": n, "noise": noise, "exercise": "d_Ridge"}
+        results = []
+
+        # Test 5-fold and 10-fold cross-validation
+        for k in [5, 10]:
+            kfold = KFold(n_splits=k, shuffle=True, random_state=2026)
+
+            for d in degrees:
+                for lamb in punishers:
+                    # Ridge model
+                    model = make_pipeline(
+                        PolynomialFeatures(degree=d, include_bias=False),
+                        StandardScaler(),
+                        Ridge(alpha=lamb)
+                    )
+
+                    # Cross-validation
+                    scores = -cross_val_score(
+                        model,
+                        x,
+                        y,
+                        cv=kfold,
+                        scoring="neg_mean_squared_error"
+                    )
+
+                    mse = np.mean(scores)
+
+                    results.append({
+                        "k": k,
+                        "d": d,
+                        "lambda": lamb,
+                        "MSE": mse
+                    })
+
+        writeToFile(naming, results)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#CrossValidationOLS(num_points, noise, degrees)
+#CrossValidationRidge(num_points, noise, degrees, punishers)
