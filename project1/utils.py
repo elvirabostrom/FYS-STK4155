@@ -62,6 +62,7 @@ def R2Score(y_pred, y_test):
 def GradOLSAnalytic(theta, X, y):
     n = len(y)
     return (2.0 / n) * X.T @ (X @ theta - y)
+
 def GradRidgeAnalytic(theta, X, y, lamb):
     return GradOLSAnalytic(theta, X, y) + 2.0 * lamb * theta
 
@@ -69,6 +70,7 @@ def GradRidgeAnalytic(theta, X, y, lamb):
 # Cost functions
 def CostOLS(theta, X, y):
     return jnp.mean((y - X @ theta) ** 2)
+
 def CostRidge(theta, X, y, lamb):
     return jnp.mean((y - X @ theta) ** 2) + lamb * jnp.sum(theta**2)
 
@@ -100,6 +102,8 @@ def GradientDescent(
         theta = theta_next
 
     return theta, max_iter
+
+
 # Complete bootstrap resampling for calculating MSE, bias, variance, for varying polynomial degree
 # Only OLS
 def bootStrap(x, y, degrees, iterations):
@@ -135,24 +139,6 @@ def formatValue(value):
         return str(value)
 
 
-"""
-# Write results to file
-# Partly Claude w/ prompt "how to put resulting files in a folder which is in the same folder as the function file"
-def writeToFile(naming, results):
-	results_dir = Path("results")
-	results_dir.mkdir(exist_ok = True)
-	filename = "_".join(f"{key}={value}" for key, value in naming.items()) + "_results.txt"
-	filepath = results_dir / filename
-	keys = list(results[0].keys()) # For column titles
-
-	with open(filepath, "w", encoding="utf-8") as file:
-	    file.write("\t".join(keys) + "\n") # Column titles
-	    for row in results: # Write results to file
-	    	line = "\t".join(formatValue(row[key]) for key in keys)
-	    	file.write(line + "\n")
-"""
-
-
 def writeToFile(naming, results):
     part = naming.get("part", naming.get("exercise", "e"))
 
@@ -175,3 +161,42 @@ def writeToFile(naming, results):
         for row in results:
             line = "\t".join(formatValue(row[key]) for key in keys)
             file.write(line + "\n")
+
+
+def optimiser_step(method, theta, g, state, t, gamma, beta=0.9, rho=0.99,
+                   beta1=0.9, beta2=0.999, eps=1e-8):
+    if method == "plain":
+        return theta - gamma * g, state
+    if method == "momentum":
+        v = beta * state.get("v", 0.0) + gamma * g               
+        state["v"] = v
+        return theta - v, state
+    if method == "adagrad":
+        r = state.get("r", 0.0) + g * g                          
+        state["r"] = r
+        return theta - gamma * g / (np.sqrt(r) + eps), state      
+    if method == "rmsprop":
+        r = rho * state.get("r", 0.0) + (1.0 - rho) * g * g       
+        state["r"] = r
+        return theta - gamma * g / (np.sqrt(r) + eps), state      
+    if method == "adam":
+        m = beta1 * state.get("m", 0.0) + (1.0 - beta1) * g       
+        r = beta2 * state.get("r", 0.0) + (1.0 - beta2) * g * g  
+        state["m"], state["r"] = m, r
+        m_hat = m / (1.0 - beta1**t)                              
+        r_hat = r / (1.0 - beta2**t)
+        return theta - gamma * m_hat / (np.sqrt(r_hat) + eps), state   
+    raise ValueError(f"unknown method {method}")
+
+
+def optimise(grad, theta0, method, gamma, num_iters=1000, tol=0.0, **kw):
+    """Run one optimiser from theta0 with the full gradient; returns all iterates."""
+    theta, state = np.array(theta0, dtype=float), {}
+    history = [theta.copy()]
+    for t in range(1, num_iters + 1):
+        g = grad(theta)
+        theta, state = optimiser_step(method, theta, g, state, t, gamma, **kw)
+        history.append(theta.copy())
+        if np.linalg.norm(g) < tol:
+            break
+    return np.array(history)
