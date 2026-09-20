@@ -1,13 +1,14 @@
 from utils import *
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold, cross_val_score
+from sklearn.linear_model import Ridge
+# -----------------------------------------------------------------------------
+# At the bottom of this file, uncomment wanted run to compute and save results
+# Set parameters at the bottom of the file, before the function call to run
+# -----------------------------------------------------------------------------
 
 seed = 2026
-
-num_points = np.array((50, 100, 250, 500))
-noise = 0.1
-degrees = np.arange(1, 16, 1)
-
 
 def plainOLS(num_points, noise, degrees):
 # OLS, calculate and save results for given noise, varying n and polynomial degree
@@ -33,9 +34,6 @@ def plainOLS(num_points, noise, degrees):
 	        })
 
 		writeToFile(naming, results)
-
-
-plainOLS(num_points, noise, degrees)
 
 
 def plainRidge(num_points, noise, degrees, punishers):
@@ -65,11 +63,6 @@ def plainRidge(num_points, noise, degrees, punishers):
 		writeToFile(naming, results)
 
 
-n_punishers = 10
-punishers = np.logspace(-6, 6, n_punishers)
-plainRidge(num_points, noise, degrees, punishers)
-
-
 def TrainTestErr(num_points, noise, degrees):
 # OLS, compute and save test and training errors, using scikit learn
 	for n in num_points:
@@ -93,10 +86,6 @@ def TrainTestErr(num_points, noise, degrees):
 			})
 		writeToFile(naming, results)
 
-degrees = np.arange(1, 20, 1)
-num_points = np.array((50, 100, 500))
-TrainTestErr(num_points, noise, degrees)
-
 
 def BootStrapOLS(num_points, noise, degrees, bootstrap_its):
 # OLS, compute and save results for bias variance tradeoff analysis, using scikit learn
@@ -114,16 +103,6 @@ def BootStrapOLS(num_points, noise, degrees, bootstrap_its):
 		})
 		writeToFile(naming, results)
 
-degrees = np.arange(1, 16, 1)
-bootstrap_its = 100
-BootStrapOLS(num_points, noise, degrees, bootstrap_its)
-
-
-
-
-# Part d
-from sklearn.model_selection import KFold, cross_val_score
-from sklearn.linear_model import Ridge
 
 def CrossValidationOLS(num_points, noise, degrees):
 # OLS, compute and save MSE using k-fold cross-validation
@@ -208,6 +187,33 @@ def CrossValidationRidge(num_points, noise, degrees, punishers):
 
         writeToFile(naming, results)
 
+# # Baseline setup
+# num_points = np.array((50, 100, 250, 500))
+# noise = 0.1
+# degrees = np.arange(1, 16, 1)
 
+# # Run OLS
+# plainOLS(num_points, noise, degrees)
+
+# # Run Ridge
+# n_punishers = 10
+# punishers = np.logspace(-6, 6, n_punishers)
+# plainRidge(num_points, noise, degrees, punishers)
+
+# # Run Hastie fig. Remake
+# degrees = np.arange(1, 20, 1)
+# num_points = np.array((50, 100, 500))
+# TrainTestErr(num_points, noise, degrees)
+
+# # Run bootstrap resampling OLS
+# degrees = np.arange(1, 16, 1)
+# bootstrap_its = 100
+# BootStrapOLS(num_points, noise, degrees, bootstrap_its)
+
+# Run cross-validation resampling OLS and Ridge, run for k=5 and k=10
 CrossValidationOLS(num_points, noise, degrees)
 CrossValidationRidge(num_points, noise, degrees, punishers)
+
+
+
+
