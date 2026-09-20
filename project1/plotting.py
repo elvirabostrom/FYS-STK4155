@@ -269,7 +269,6 @@ plt.savefig("figures/n=100_noise=0.1_exercise=c_Hastie_500_OLS.pdf", bbox_inches
 
 # n = 50
 data_c = readResultsFile("results/part=c_tradeoff/n=50_noise=0.1_results.txt")
-print(data_c)
 d = data_c["degrees"][0]
 MSE = data_c["MSE"][0]
 bias = data_c["bias"][0]
@@ -347,7 +346,6 @@ plt.savefig("figures/n=500_noise=0.1_exercise=c_tradeoff_OLS.pdf", bbox_inches='
 
 # n = 50
 data_d = readResultsFile("results/part=d_OLS/n=50_noise=0.1_results.txt")
-print(data_d)
 
 k = data_d["k"]
 d = data_d["d"]
@@ -358,11 +356,11 @@ plt.figure(figsize=(2.5, 2.3))
 mask5 = k == 5
 mask10 = k == 10
 
-plt.plot(d[mask5], MSE[mask5], label="k = 5")
-plt.plot(d[mask10], MSE[mask10], label="k = 10")
+plt.plot(d[mask5], MSE[mask5], label="k = 5", color = "midnightblue")
+plt.plot(d[mask10], MSE[mask10], label="k = 10", color = "dodgerblue")
 
 plt.xlabel(r"Polynomial degree $(d)$")
-plt.ylabel("Mean Squared Error")
+plt.ylabel("MSE")
 plt.xlim(np.min(d), np.max(d))
 plt.title(r"$n = 50$")
 plt.grid()
@@ -373,7 +371,7 @@ plt.savefig(
     "figures/n=50_noise=0.1_exercise=d_MSE_OLS_CV.pdf",
     bbox_inches="tight"
 )
-#plt.show()
+plt.show()
 
 
 # n = 100
@@ -388,8 +386,8 @@ plt.figure(figsize=(2.3, 2.3))
 mask5 = k == 5
 mask10 = k == 10
 
-plt.plot(d[mask5], MSE[mask5], label="k = 5")
-plt.plot(d[mask10], MSE[mask10], label="k = 10")
+plt.plot(d[mask5], MSE[mask5], label="k = 5", color = "midnightblue")
+plt.plot(d[mask10], MSE[mask10], label="k = 10", color = "dodgerblue")
 
 plt.xlabel(r"Polynomial degree $(d)$")
 plt.xlim(np.min(d), np.max(d))
@@ -402,7 +400,7 @@ plt.savefig(
     "figures/n=100_noise=0.1_exercise=d_MSE_OLS_CV.pdf",
     bbox_inches="tight"
 )
-#plt.show()
+plt.show()
 
 
 # n = 500
@@ -417,8 +415,8 @@ plt.figure(figsize=(3.5, 2.3))
 mask5 = k == 5
 mask10 = k == 10
 
-plt.plot(d[mask5], MSE[mask5], label="k = 5")
-plt.plot(d[mask10], MSE[mask10], label="k = 10")
+plt.plot(d[mask5], MSE[mask5], label="k = 5", color = "midnightblue")
+plt.plot(d[mask10], MSE[mask10], label="k = 10", color = "dodgerblue")
 
 plt.xlabel(r"Polynomial degree $(d)$")
 plt.xlim(np.min(d), np.max(d))
@@ -438,68 +436,282 @@ plt.savefig(
     "figures/n=500_noise=0.1_exercise=d_MSE_OLS_CV.pdf",
     bbox_inches="tight"
 )
-#plt.show()
-
+plt.show()
 
 # -----------------------------------
-# Part D
-# Cross-validation Ridge
+# Optimal lambda
 # -----------------------------------
+data = readResultsFile("results/part=d_Ridge/n=100_noise=0.1_results.txt")
+# k = 5
+k_val = 5
+mask = data["k"] == k_val
+idx_min = np.argmin(data["MSE"][mask])
+best_d = data["d"][mask][idx_min]
+best_lambda = data["lambda"][mask][idx_min]
+best_mse = data["MSE"][mask][idx_min]
+print(f"k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best_mse:.5f}")
+# k = 10
+k_val = 10
+mask = data["k"] == k_val
+idx_min = np.argmin(data["MSE"][mask])
+best_d = data["d"][mask][idx_min]
+best_lambda = data["lambda"][mask][idx_min]
+best_mse = data["MSE"][mask][idx_min]
+print(f"k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best_mse:.5f}")
+# Output
+# k=5: optimal d=12, lambda=5.59e-08, MSE=0.01294
+# k=10: optimal d=12, lambda=8.11e-08, MSE=0.01301
 
-num_points = [50, 100, 500]
-noise = 0.1
 
-for n in num_points:
+# Global optimal lambda (d, lam) per (n,k)
+for n in [50, 100, 500]:
+    data = readResultsFile(f"results/part=d_Ridge/n={n}_noise=0.1_results.txt")
 
-    data = readResultsFile(
-        f"results/part=d_Ridge/n={n}_noise={noise}_results.txt"
+    for k_val in [5, 10]:
+        mask = data["k"] == k_val
+
+        idx_min = np.argmin(data["MSE"][mask])
+        best_d = data["d"][mask][idx_min]
+        best_lambda = data["lambda"][mask][idx_min]
+        best_mse = data["MSE"][mask][idx_min]
+
+        print(f"n={n}, k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best_mse:.5f}")
+# Output
+# n=50, k=5: optimal d=12, lambda=5.59e-08, MSE=0.01320
+# n=50, k=10: optimal d=11, lambda=2.48e-07, MSE=0.01315
+# n=100, k=5: optimal d=12, lambda=5.59e-08, MSE=0.01294
+# n=100, k=10: optimal d=12, lambda=8.11e-08, MSE=0.01301
+# n=500, k=5: optimal d=14, lambda=0, MSE=0.01077
+# n=500, k=10: optimal d=14, lambda=0, MSE=0.01086
+
+
+# MSE as function of lambda for k = 5 and k = 10, n = 100 and d = 5
+data = readResultsFile("results/part=d_Ridge/n=100_noise=0.1_results.txt")
+chosen_degree = 5
+plt.figure(figsize=(2.6, 2.2))
+for k_val, color in zip([5, 10], ["midnightblue", "dodgerblue"]):
+    mask = (data["k"] == k_val) & (data["d"] == chosen_degree)
+    order = np.argsort(data["lambda"][mask])
+    lamb_sorted = data["lambda"][mask][order]
+    mse_sorted = data["MSE"][mask][order]
+    plt.plot(lamb_sorted, mse_sorted, label=f"k={k_val}", color = color)
+plt.xscale("log")
+plt.xlabel(r"Penalty $(\lambda)$")
+plt.ylabel("MSE")
+plt.title("d = 5")
+plt.grid()
+plt.xlim(np.min(lamb_sorted), np.max(lamb_sorted))
+plt.tight_layout()
+plt.savefig("figures/n=100_noise=0.1_exercise=d_MSE_vs_lambda_Ridge_CV_d5.pdf", bbox_inches='tight')
+plt.show()
+# MSE as function of lambda for k = 5 and k = 10, n = 100 and d = 10
+data = readResultsFile("results/part=d_Ridge/n=100_noise=0.1_results.txt")
+chosen_degree = 10
+plt.figure(figsize=(2.5, 2.2))
+for k_val, color in zip([5, 10], ["midnightblue", "dodgerblue"]):
+    mask = (data["k"] == k_val) & (data["d"] == chosen_degree)
+    order = np.argsort(data["lambda"][mask])
+    lamb_sorted = data["lambda"][mask][order]
+    mse_sorted = data["MSE"][mask][order]
+    plt.plot(lamb_sorted, mse_sorted, label=f"k={k_val}", color = color)
+plt.xscale("log")
+plt.xlabel(r"Penalty $(\lambda)$")
+plt.title("d = 10")
+plt.grid()
+plt.xlim(np.min(lamb_sorted), np.max(lamb_sorted))
+plt.tight_layout()
+plt.savefig("figures/n=100_noise=0.1_exercise=d_MSE_vs_lambda_Ridge_CV_d10.pdf", bbox_inches='tight')
+plt.show()
+# MSE as function of lambda for k = 5 and k = 10, n = 100 and d = 14
+data = readResultsFile("results/part=d_Ridge/n=100_noise=0.1_results.txt")
+chosen_degree = 14
+plt.figure(figsize=(3.1, 2.2))
+for k_val, color in zip([5, 10], ["midnightblue", "dodgerblue"]):
+    mask = (data["k"] == k_val) & (data["d"] == chosen_degree)
+    order = np.argsort(data["lambda"][mask])
+    lamb_sorted = data["lambda"][mask][order]
+    mse_sorted = data["MSE"][mask][order]
+    plt.plot(lamb_sorted, mse_sorted, label=f"k={k_val}", color = color)
+plt.xscale("log")
+plt.xlabel(r"Penalty $(\lambda)$")
+plt.legend(
+    loc="upper left",
+    bbox_to_anchor=(1.02, 1),
+    frameon=False
+)
+plt.title("d = 14")
+plt.grid()
+plt.xlim(np.min(lamb_sorted), np.max(lamb_sorted))
+plt.tight_layout()
+plt.savefig("figures/n=100_noise=0.1_exercise=d_MSE_vs_lambda_Ridge_CV_d14.pdf", bbox_inches='tight')
+plt.show()
+
+
+
+# MSE as function of d, for all different n, with set optimal lambda for each
+# MSE as function of polynomial degree for n = 50
+data = readResultsFile("results/part=d_Ridge/n=50_noise=0.1_results.txt")
+plt.figure(figsize=(2.5, 2.2))
+for k_val, color, chosen_lambda in zip(
+    [5, 10],
+    ["midnightblue", "dodgerblue"],
+    [5.59e-08, 3.85e-08]
+):
+    mask = (
+        (data["k"] == k_val)
+        & np.isclose(data["lambda"], chosen_lambda)
     )
 
-    k = data["k"]
-    d = data["d"]
-    lamb = data["lambda"]
-    mse = data["MSE"]
-
-    plt.figure(figsize=(3.7, 2.8))
-
-    for lam in np.unique(lamb):
-
-        mask5 = (k == 5) & (lamb == lam)
-        mask10 = (k == 10) & (lamb == lam)
-
-        plt.plot(
-            d[mask5], mse[mask5],
-            label=fr"$\lambda={lam:.1e}$, k=5"
-        )
-
-        plt.plot(
-            d[mask10], mse[mask10],
-            linestyle="--",
-            label=fr"$\lambda={lam:.1e}$, k=10"
-        )
-
-    plt.xlabel(r"Polynomial degree $(d)$")
-    plt.ylabel("Mean Squared Error")
-    plt.title(f"n = {n}")
-    plt.grid()
-    plt.xlim(np.min(d), np.max(d))
-
-    # Place legend to the right of the plot
-    plt.legend(
-        fontsize=6,
-        loc="center left",
-        bbox_to_anchor=(1.02, 0.5)
+    order = np.argsort(data["d"][mask])
+    d_sorted = data["d"][mask][order]
+    mse_sorted = data["MSE"][mask][order]
+    plt.plot(
+        d_sorted,
+        mse_sorted,
+        label=f"k={k_val}",
+        color=color
     )
-
-    plt.tight_layout()
-    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
-
-    plt.savefig(
-        f"figures/n={n}_noise={noise}_exercise=d_MSE_Ridge_CV.pdf",
-        bbox_inches="tight"
+plt.xlabel(r"Polynomial degree $(d)$")
+plt.ylabel("MSE")
+plt.grid()
+plt.title("n = 50")
+plt.xlim(np.min(d_sorted), np.max(d_sorted))
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.tight_layout()
+plt.savefig(
+    "figures/n=50_noise=0.1_exercise=d_MSE_vs_degree_Ridge_CV.pdf",
+    bbox_inches="tight"
+)
+plt.show()
+# MSE as function of polynomial degree for n = 100
+data = readResultsFile("results/part=d_Ridge/n=100_noise=0.1_results.txt")
+plt.figure(figsize=(2.4, 2.2))
+for k_val, color, chosen_lambda in zip(
+    [5, 10],
+    ["midnightblue", "dodgerblue"],
+    [1.18e-07, 9.77e-08]
+):
+    mask = (
+        (data["k"] == k_val)
+        & np.isclose(data["lambda"], chosen_lambda)
     )
+    order = np.argsort(data["d"][mask])
+    d_sorted = data["d"][mask][order]
+    mse_sorted = data["MSE"][mask][order]
+    plt.plot(
+        d_sorted,
+        mse_sorted,
+        label=f"k={k_val}",
+        color=color
+    )
+plt.xlabel(r"Polynomial degree $(d)$")
+plt.grid()
+plt.title("n = 100")
+plt.xlim(np.min(d_sorted), np.max(d_sorted))
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.tight_layout()
+plt.savefig(
+    "figures/n=100_noise=0.1_exercise=d_MSE_vs_degree_Ridge_CV.pdf",
+    bbox_inches="tight"
+)
+plt.show()
+# MSE as function of polynomial degree for n = 500
+data = readResultsFile("results/part=d_Ridge/n=500_noise=0.1_results.txt")
+plt.figure(figsize=(3.1, 2.2))
+for k_val, color in zip(
+    [5, 10],
+    ["midnightblue", "dodgerblue"]
+):
+    chosen_lambda = 0.0
+    mask = (
+        (data["k"] == k_val)
+        & np.isclose(data["lambda"], chosen_lambda)
+    )
+    order = np.argsort(data["d"][mask])
+    d_sorted = data["d"][mask][order]
+    mse_sorted = data["MSE"][mask][order]
+    plt.plot(
+        d_sorted,
+        mse_sorted,
+        label=f"k={k_val}",
+        color=color
+    )
+plt.xlabel(r"Polynomial degree $(d)$")
+plt.legend(
+    loc="upper left",
+    bbox_to_anchor=(1.02, 1),
+    frameon=False
+)
+plt.grid()
+plt.xlim(np.min(d_sorted), np.max(d_sorted))
+plt.title("n = 500")
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.tight_layout()
+plt.savefig(
+    "figures/n=500_noise=0.1_exercise=d_MSE_vs_degree_Ridge_CV.pdf",
+    bbox_inches="tight"
+)
+plt.show()
 
-    # plt.show()
+# # -----------------------------------
+# # Part D
+# # Cross-validation Ridge
+# # -----------------------------------
+
+# num_points = [50, 100, 500]
+# noise = 0.1
+
+# for n in num_points:
+
+#     data = readResultsFile(
+#         f"results/part=d_Ridge/n={n}_noise={noise}_results.txt"
+#     )
+
+#     k = data["k"]
+#     d = data["d"]
+#     lamb = data["lambda"]
+#     mse = data["MSE"]
+
+#     plt.figure(figsize=(3.7, 2.8))
+
+#     for lam in np.unique(lamb):
+
+#         mask5 = (k == 5) & (lamb == lam)
+#         mask10 = (k == 10) & (lamb == lam)
+
+#         plt.plot(
+#             d[mask5], mse[mask5],
+#             label=fr"$\lambda={lam:.1e}$, k=5",
+#         )
+
+#         plt.plot(
+#             d[mask10], mse[mask10],
+#             linestyle="--",
+#             label=fr"$\lambda={lam:.1e}$, k=10"
+#         )
+
+#     plt.xlabel(r"Polynomial degree $(d)$")
+#     plt.ylabel("MSE")
+#     plt.title(f"n = {n}")
+#     plt.grid()
+#     plt.xlim(np.min(d), np.max(d))
+
+#     # Place legend to the right of the plot
+#     plt.legend(
+#         fontsize=6,
+#         loc="center left",
+#         bbox_to_anchor=(1.02, 0.5)
+#     )
+
+#     plt.tight_layout()
+#     plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+
+#     plt.savefig(
+#         f"figures/n={n}_noise={noise}_exercise=d_MSE_Ridge_CV.pdf",
+#         bbox_inches="tight"
+#     )
+
+#     plt.show()
 
 
 

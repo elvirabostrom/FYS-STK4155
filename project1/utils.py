@@ -200,3 +200,5 @@ def optimise(grad, theta0, method, gamma, num_iters=1000, tol=0.0, **kw):
         if np.linalg.norm(g) < tol:
             break
     return np.array(history)
+
+    

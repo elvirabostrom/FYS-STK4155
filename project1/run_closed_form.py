@@ -115,7 +115,7 @@ def CrossValidationOLS(num_points, noise, degrees):
 
         # Test 5-fold and 10-fold cross-validation
         for k in [5, 10]:
-            kfold = KFold(n_splits=k, shuffle=True, random_state=2026)
+            kfold = KFold(n_splits=k, shuffle=True, random_state = 1)
 
             for d in degrees:
                 # OLS model
@@ -145,6 +145,8 @@ def CrossValidationOLS(num_points, noise, degrees):
         writeToFile(naming, results)
 
 
+#seed = 12345 # CHANGED SEED FOR DATA TO CONFIRM THAT ERROR DID NOT COME FROM OUR METHOD - just a test
+
 def CrossValidationRidge(num_points, noise, degrees, punishers):
 # Ridge, compute and save MSE using k-fold cross-validation
     for n in num_points:
@@ -156,7 +158,8 @@ def CrossValidationRidge(num_points, noise, degrees, punishers):
 
         # Test 5-fold and 10-fold cross-validation
         for k in [5, 10]:
-            kfold = KFold(n_splits=k, shuffle=True, random_state=2026)
+            kfold = KFold(n_splits=k, shuffle=True, random_state= 1)
+            n_train = n - n // k # Approximated training size per fold for current k
 
             for d in degrees:
                 for lamb in punishers:
@@ -164,7 +167,7 @@ def CrossValidationRidge(num_points, noise, degrees, punishers):
                     model = make_pipeline(
                         PolynomialFeatures(degree=d, include_bias=False),
                         StandardScaler(),
-                        Ridge(alpha=lamb)
+                        Ridge(alpha = n_train * lamb)
                     )
 
                     # Cross-validation
@@ -187,31 +190,33 @@ def CrossValidationRidge(num_points, noise, degrees, punishers):
 
         writeToFile(naming, results)
 
-# # Baseline setup
-# num_points = np.array((50, 100, 250, 500))
-# noise = 0.1
-# degrees = np.arange(1, 16, 1)
+# Baseline setup
+num_points = np.array((50, 100, 250, 500))
+noise = 0.1
+degrees = np.arange(1, 16, 1)
+n_punishers = 10 # Regularization parameters for Ridge
+punishers = np.logspace(-6, 6, n_punishers)
 
-# # Run OLS
+# Run OLS
 # plainOLS(num_points, noise, degrees)
 
-# # Run Ridge
-# n_punishers = 10
-# punishers = np.logspace(-6, 6, n_punishers)
+# Run Ridge
 # plainRidge(num_points, noise, degrees, punishers)
 
-# # Run Hastie fig. Remake
-# degrees = np.arange(1, 20, 1)
-# num_points = np.array((50, 100, 500))
-# TrainTestErr(num_points, noise, degrees)
+# Run Hastie fig. Remake
+degrees = np.arange(1, 20, 1)
+num_points = np.array((50, 100, 500))
+TrainTestErr(num_points, noise, degrees)
 
-# # Run bootstrap resampling OLS
-# degrees = np.arange(1, 16, 1)
-# bootstrap_its = 100
+# Run bootstrap resampling OLS
+degrees = np.arange(1, 16, 1)
+bootstrap_its = 100
 # BootStrapOLS(num_points, noise, degrees, bootstrap_its)
 
 # Run cross-validation resampling OLS and Ridge, run for k=5 and k=10
 CrossValidationOLS(num_points, noise, degrees)
+n_punishers = 100 # Regularization parameters for Ridge
+punishers = np.concatenate([[0], np.logspace(-10, -2, n_punishers)]) # Including OLS lambda = 0
 CrossValidationRidge(num_points, noise, degrees, punishers)
 
 
