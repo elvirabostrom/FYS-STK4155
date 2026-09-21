@@ -940,3 +940,109 @@ if sens_file.exists():
     plt.tight_layout()
     plt.savefig("figures/part_f_lr_sensitivity_ridge.pdf", bbox_inches="tight")
     plt.close()
+
+
+
+# =====================================================================
+# PART G
+# Written with Claude (Sept 2026)
+# =====================================================================
+res_g = Path("results") / "part=g"
+data_g = readResultsFile(res_g / "n=100_noise=0.1_d=10_type=lambda_sweep_results.txt")
+lam_g, meth_g = data_g["lambda"], data_g["method"]
+ 
+# ---------------------------------------------------------------------
+# 1. Coefficients at lambda = 0.01: subgradient descent vs soft thresholding
+# ---------------------------------------------------------------------
+chosen_lambda = 1e-2
+bars = [("plain", "Subgradient, plain GD", "#1f77b4"),
+        ("adam", "Subgradient, Adam", "#9467bd"),
+        ("soft_threshold", "Soft thresholding (3.64)", "k")]
+fig, ax = plt.subplots(figsize=(4.5, 2.8))
+for k, (method, label, color) in enumerate(bars):
+    mask = (meth_g == method) & np.isclose(lam_g, chosen_lambda)
+    theta = np.abs(np.asarray(data_g["theta"][mask][0], dtype=float))
+    idx = np.arange(1, len(theta) + 1)
+    ax.bar(idx + (k - 1) * 0.27, np.maximum(theta, 1e-16), width=0.27, color=color, label=label)
+ax.set_yscale("log")
+ax.set_ylim(1e-6, 2)
+ax.set_xlabel(r"Coefficient index $j$ (power $x^j$)")
+ax.set_ylabel(r"$|\theta_j|$")
+ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+ax.grid(axis="y")
+ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1), frameon=False, fontsize=8)
+plt.tight_layout()
+plt.savefig("figures/n=100_noise=0.1_exercise=g_coefficients_Lasso.pdf", bbox_inches="tight")
+plt.close()
+ 
+# ---------------------------------------------------------------------
+# 2. Distance from the scikit-learn minimum vs lambda (d = 10)
+# ---------------------------------------------------------------------
+fig, ax = plt.subplots(figsize=(4.8, 2.8))
+for method, style in method_styles.items():
+    mask = meth_g == method
+    ax.plot(lam_g[mask], np.maximum(data_g["cost_diff_sklearn"][mask], 1e-16),
+            marker=style["marker"], color=style["color"], label=style["label"], markersize=4)
+mask = meth_g == "soft_threshold"
+ax.plot(lam_g[mask], np.maximum(data_g["cost_diff_sklearn"][mask], 1e-16), color="k",
+        linestyle="--", label="Soft thresholding")
+ax.set_xscale("log")
+ax.set_yscale("log")
+ax.set_ylim(1e-12, 1)
+ax.set_xlabel(r"Penalty $(\lambda)$")
+ax.set_ylabel(r"$C(\boldsymbol{\theta}) - C(\boldsymbol{\theta}_{\mathrm{sklearn}})$")
+ax.grid()
+ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1), frameon=False, fontsize=8)
+plt.tight_layout()
+plt.savefig("figures/n=100_noise=0.1_exercise=g_cost_vs_lambda_Lasso.pdf", bbox_inches="tight")
+plt.close()
+ 
+# ---------------------------------------------------------------------
+# 3. Test MSE vs degree: OLS, Ridge, Lasso (exact and Adam)
+# ---------------------------------------------------------------------
+data_gd = readResultsFile(res_g / "n=100_noise=0.1_lambda=0.001_type=degree_sweep_results.txt")
+model_g, meth_gd, d_g = data_gd["model"], data_gd["method"], data_gd["d"]
+colors_g = {"OLS": "b", "Ridge": "palevioletred", "Lasso": "k"}
+ 
+fig, ax = plt.subplots(figsize=(4.5, 2.8))
+for model, color in colors_g.items():
+    mask = (model_g == model) & (meth_gd == "exact")
+    ax.plot(d_g[mask], data_gd["MSE"][mask], color=color, label=f"{model} (exact)")
+    mask = (model_g == model) & (meth_gd == "adam")
+    ax.plot(d_g[mask], data_gd["MSE"][mask], color=color, linestyle="--", marker="*",
+            markersize=4, label=f"{model} (Adam)")
+ax.set_yscale("log")
+ax.set_xlabel(r"Polynomial degree $(d)$")
+ax.set_ylabel("MSE")
+ax.set_xlim(d_g.min(), d_g.max())
+ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+ax.grid()
+ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1), frameon=False, fontsize=8)
+plt.tight_layout()
+plt.savefig("figures/n=100_noise=0.1_exercise=g_MSE_vs_degree_OLS_Ridge_Lasso.pdf",
+            bbox_inches="tight")
+plt.close()
+ 
+# ---------------------------------------------------------------------
+# 4. Lasso test MSE vs degree for every optimiser
+# ---------------------------------------------------------------------
+fig, ax = plt.subplots(figsize=(4.8, 2.8))
+mask = (model_g == "Lasso") & (meth_gd == "exact")
+ax.plot(d_g[mask], data_gd["MSE"][mask], color="grey", linewidth=3, alpha=0.5,
+        label="Scikit-Learn")
+for method, style in method_styles.items():
+    mask = (model_g == "Lasso") & (meth_gd == method)
+    ax.plot(d_g[mask], data_gd["MSE"][mask], marker=style["marker"], color=style["color"],
+            label=style["label"], markersize=4)
+ax.set_yscale("log")
+ax.set_xlabel(r"Polynomial degree $(d)$")
+ax.set_ylabel("MSE")
+ax.set_xlim(d_g.min(), d_g.max())
+ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+ax.grid()
+ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1), frameon=False, fontsize=8)
+plt.tight_layout()
+plt.savefig("figures/n=100_noise=0.1_exercise=g_MSE_vs_degree_Lasso_methods.pdf",
+            bbox_inches="tight")
+plt.close()
+ 
