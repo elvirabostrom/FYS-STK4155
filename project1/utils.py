@@ -128,7 +128,7 @@ def bootStrap(x, y, degrees, iterations):
 
 
 # Make some object into string
-# Written by Claude w/ prompt "can you make a function fitting my function writeToFile that takes some value, number, array, list, and turns it into a string"
+# Written by Claude (2026) w/ prompt "can you make a function fitting my function writeToFile that takes some value, number, array, list, and turns it into a string"
 def formatValue(value):
     if isinstance(value, (list, np.ndarray)):
         arr = np.ravel(value)
@@ -139,6 +139,8 @@ def formatValue(value):
         return str(value)
 
 
+# Write data to file
+# Partly ritten by Claude (2026) w/ prompt "can you make this function take any object"
 def writeToFile(naming, results):
     part = naming.get("part", naming.get("exercise", "e"))
 
