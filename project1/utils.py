@@ -128,7 +128,7 @@ def bootStrap(x, y, degrees, iterations):
 
 
 # Make some object into string
-# Written by Claude w/ prompt "can you make a function fitting my function writeToFile that takes some value, number, array, list, and turns it into a string"
+# Written by Claude (2026) w/ prompt "can you make a function fitting my function writeToFile that takes some value, number, array, list, and turns it into a string"
 def formatValue(value):
     if isinstance(value, (list, np.ndarray)):
         arr = np.ravel(value)
@@ -139,6 +139,8 @@ def formatValue(value):
         return str(value)
 
 
+# Write data to file
+# Partly ritten by Claude (2026) w/ prompt "can you make this function take any object"
 def writeToFile(naming, results):
     part = naming.get("part", naming.get("exercise", "e"))
 
@@ -200,4 +202,38 @@ def optimise(grad, theta0, method, gamma, num_iters=1000, tol=0.0, **kw):
         if np.linalg.norm(g) < tol:
             break
     return np.array(history)
+
+
+#For Lasso part
+#Written by Claude (sept 2026); soft thresholding is Eq. (3.64) from the lecturebook written by Morten
+#As well as cost, from lecturebook, Eq. (3.57)
+
+from sklearn.linear_model import Lasso
+ 
+def CostLasso(theta, X, y, lamb):
+    return jnp.mean((y - X @ theta) ** 2) + lamb * jnp.sum(jnp.abs(theta))
+
+# Soft thresholding operator, lecture notes Eq. (3.64)
+def soft_threshold(z, tau):
+    return np.sign(z) * np.maximum(np.abs(z) - tau, 0.0)
+
+
+# Subgradient of the Lasso cost: OLS gradient + lamb * sgn(theta).
+# np.sign(0) = 0, which lies in the subdifferential [-1, 1] of |theta| at 0.
+def GradLassoAnalytic(theta, X, y, lamb):
+    return GradOLSAnalytic(theta, X, y) + lamb * np.sign(theta)
+ 
+ 
+# Soft thresholding operator S_tau(z) = sgn(z) max(|z| - tau, 0), Eq. (3.64)
+def soft_threshold(z, tau):
+    return np.sign(z) * np.maximum(np.abs(z) - tau, 0.0)
+ 
+ 
+# Scikit-learn's Lasso minimises (1/(2n))||y - X theta||^2 + alpha ||theta||_1,
+# i.e. our cost divided by 2, so alpha = lamb / 2.
+def sklearnLasso(X, y, lamb):
+    model = Lasso(alpha=lamb / 2.0, fit_intercept=False, max_iter=100000, tol=1e-10)
+    model.fit(X, y)
+    return model.coef_
+
 
