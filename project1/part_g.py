@@ -161,3 +161,35 @@ for d in degrees:
 
 writeToFile({"n": n, "noise": noise, "lambda": lamb_cmp, "type": "degree_sweep",
              "exercise": "g"}, results_degree)
+
+
+# =====================================================================
+# 4. Learning-rate sensitivity for Lasso (same setup as part f), d = 5
+# =====================================================================
+lamb_lr = 1e-2
+X_tr, X_te, y_c, y_tr, y_te = prepare(d_fixed)
+p = X_tr.shape[1]
+theta_sk = sklearnLasso(X_tr, y_c, lamb_lr)
+learning_rates = np.logspace(-6, 0, 25)   # use the SAME grid as the part f script
+results_lr = []
+
+def grad_lr(theta):
+    return GradLassoAnalytic(theta, X_tr, y_c, lamb_lr)
+
+for lr in learning_rates:
+    for method in methods:
+        with np.errstate(over="ignore", invalid="ignore"):   # large lr diverges for plain GD
+            theta = optimise(grad_lr, np.zeros(p), method, lr, num_iters=num_iters)[-1]
+        results_lr.append({"method": method, "learning_rate": lr,
+                           "final_param_error": np.max(np.abs(theta - theta_sk))})
+
+    theta = np.zeros(p)
+    with np.errstate(over="ignore", invalid="ignore"):
+        for _ in range(num_iters):
+            theta = soft_threshold(theta - lr * GradOLSAnalytic(theta, X_tr, y_c), lamb_lr * lr)
+    results_lr.append({"method": "soft_threshold", "learning_rate": lr,
+                       "final_param_error": np.max(np.abs(theta - theta_sk))})
+    print(f"4. lr = {lr:.1e} done")
+
+writeToFile({"n": n, "noise": noise, "d": d_fixed, "lambda": lamb_lr,
+             "type": "lr_sensitivity", "exercise": "g"}, results_lr)
