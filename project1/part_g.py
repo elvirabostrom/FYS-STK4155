@@ -80,8 +80,8 @@ for lamb in lambdas:
         return GradLassoAnalytic(theta, X_tr, y_c, lamb)
 
     for method in methods:
-        1r = gamma_plain(X_tr) if method == "plain" else gamma
-        theta = optimise(grad, theta_init, method, 1r, num_iters=num_iters)[-1]
+        lr = gamma_plain(X_tr) if method == "plain" else gamma
+        theta = optimise(grad, theta_init, method, lr, num_iters=num_iters)[-1]
         results_lambda.append({
             "method": method, "lambda": lamb,
             "param_diff_sklearn": np.max(np.abs(theta - theta_sk)),
@@ -94,9 +94,9 @@ for lamb in lambdas:
 
     # As soft thresholding is build on plain GD
     theta = theta_init.copy()
-    1r = gamma_plain(X_tr)
+    lr = gamma_plain(X_tr)
     for _ in range(num_iters):
-        theta = soft_threshold(theta - 1r * GradOLSAnalytic(theta, X_tr, y_c), lamb * 1r)
+        theta = soft_threshold(theta - lr * GradOLSAnalytic(theta, X_tr, y_c), lamb * lr)
     results_lambda.append({
         "method": "soft_threshold", "lambda": lamb,
         "param_diff_sklearn": np.max(np.abs(theta - theta_sk)),
@@ -145,8 +145,8 @@ for d in degrees:
     for model in ["OLS", "Ridge", "Lasso"]:
         thetas = {"exact": exact[model]}
         for method in methods:
-            1r = gamma_plain(X_tr) if method == "plain" else gamma
-            thetas[method] = optimise(grads[model], np.zeros(p), method, 1r,
+            lr = gamma_plain(X_tr) if method == "plain" else gamma
+            thetas[method] = optimise(grads[model], np.zeros(p), method, lr,
                                       num_iters=num_iters)[-1]
         for method, theta in thetas.items():
             y_pred = X_te @ theta + y_tr.mean()
