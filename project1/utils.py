@@ -213,11 +213,6 @@ from sklearn.linear_model import Lasso
 def CostLasso(theta, X, y, lamb):
     return jnp.mean((y - X @ theta) ** 2) + lamb * jnp.sum(jnp.abs(theta))
 
-# Soft thresholding operator, lecture notes Eq. (3.64)
-def soft_threshold(z, tau):
-    return np.sign(z) * np.maximum(np.abs(z) - tau, 0.0)
-
-
 # Subgradient of the Lasso cost: OLS gradient + lamb * sgn(theta).
 # np.sign(0) = 0, which lies in the subdifferential [-1, 1] of |theta| at 0.
 def GradLassoAnalytic(theta, X, y, lamb):

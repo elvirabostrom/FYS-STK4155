@@ -25,7 +25,7 @@ noise = 0.1
 seed = 2026
 methods = ["plain", "momentum", "adagrad", "rmsprop", "adam"]
 gamma = 0.01
-num_iters = 20000
+num_iters = 10000 #Making it consistent with other parts, specifically e and f
 
 x, y = MakeData(n, noise, seed + n)
 
@@ -36,6 +36,12 @@ def prepare(d):
     X_train_scaled, X_test_scaled, y_train_centered = scaleData(X_train, X_test, y_train)
     return X_train_scaled, X_test_scaled, y_train_centered, y_train, y_test
 
+# Learning rate for plain GD, as in part e: 0.5 * 2 / (largest eigenvalue of the Hessian)
+# Hessian of the smooth (OLS) part of the Lasso cost: (2/n) X^T X
+def gamma_plain(X):
+    H = (2.0 / X.shape[0]) * X.T @ X
+    return 0.5 * 2.0 / np.max(np.linalg.eigvalsh(H))
+#y=0.5y_max for plain gradient descent, and y=0.01y_max for the others
 
 # =====================================================================
 # 1. Automatic differentiation of |theta| at theta = 0
@@ -59,7 +65,7 @@ print(f"   Analytic subgradient = JAX gradient for theta != 0 (max diff {ad_diff
 # =====================================================================
 # 2. Lasso vs scikit-learn as a function of lambda, d = 10
 # =====================================================================
-d_fixed = 10
+d_fixed = 5 #making it consistent with other parts again. 
 X_tr, X_te, y_c, y_tr, y_te = prepare(d_fixed)
 p = X_tr.shape[1]
 theta_init = np.zeros(p)
@@ -74,7 +80,8 @@ for lamb in lambdas:
         return GradLassoAnalytic(theta, X_tr, y_c, lamb)
 
     for method in methods:
-        theta = optimise(grad, theta_init, method, gamma, num_iters=num_iters)[-1]
+        1r = gamma_plain(X_tr) if method == "plain" else gamma
+        theta = optimise(grad, theta_init, method, 1r, num_iters=num_iters)[-1]
         results_lambda.append({
             "method": method, "lambda": lamb,
             "param_diff_sklearn": np.max(np.abs(theta - theta_sk)),
@@ -85,10 +92,11 @@ for lamb in lambdas:
             "theta": theta,
         })
 
-    # For the discussion: plain GD followed by soft thresholding, Eq. (3.64)
+    # As soft thresholding is build on plain GD
     theta = theta_init.copy()
+    1r = gamma_plain(X_tr)
     for _ in range(num_iters):
-        theta = soft_threshold(theta - gamma * GradOLSAnalytic(theta, X_tr, y_c), lamb * gamma)
+        theta = soft_threshold(theta - 1r * GradOLSAnalytic(theta, X_tr, y_c), lamb * 1r)
     results_lambda.append({
         "method": "soft_threshold", "lambda": lamb,
         "param_diff_sklearn": np.max(np.abs(theta - theta_sk)),
@@ -119,7 +127,7 @@ writeToFile({"n": n, "noise": noise, "d": d_fixed, "type": "lambda_sweep", "exer
 # =====================================================================
 # 3. OLS, Ridge and Lasso as functions of the polynomial degree
 # =====================================================================
-lamb_cmp = 1e-3  # same penalty as used for Ridge in part f
+lamb_cmp = 1e-2  # same penalty as used for Ridge in part e and f
 degrees = np.arange(1, 16)
 results_degree = []
 
@@ -137,7 +145,8 @@ for d in degrees:
     for model in ["OLS", "Ridge", "Lasso"]:
         thetas = {"exact": exact[model]}
         for method in methods:
-            thetas[method] = optimise(grads[model], np.zeros(p), method, gamma,
+            1r = gamma_plain(X_tr) if method == "plain" else gamma
+            thetas[method] = optimise(grads[model], np.zeros(p), method, 1r,
                                       num_iters=num_iters)[-1]
         for method, theta in thetas.items():
             y_pred = X_te @ theta + y_tr.mean()
