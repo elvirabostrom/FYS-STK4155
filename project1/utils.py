@@ -74,7 +74,7 @@ def CostOLS(theta, X, y):
 def CostRidge(theta, X, y, lamb):
     return jnp.mean((y - X @ theta) ** 2) + lamb * jnp.sum(theta**2)
 
-
+"""
 # Gradient Descent
 def GradientDescent(
     X,
@@ -102,7 +102,7 @@ def GradientDescent(
         theta = theta_next
 
     return theta, max_iter
-
+"""
 
 # Complete bootstrap resampling for calculating MSE, bias, variance, for varying polynomial degree
 # Only OLS

@@ -270,7 +270,7 @@ plt.savefig("figures/n=100_noise=0.1_exercise=c_Hastie_500_OLS.pdf", bbox_inches
 
 # n = 50
 data_c = readResultsFile("results/part=c_tradeoff/n=50_noise=0.1_results.txt")
-print(data_c)
+#print(data_c)
 d = data_c["degrees"][0]
 MSE = data_c["MSE"][0]
 bias = data_c["bias"][0]
@@ -348,7 +348,7 @@ plt.savefig("figures/n=500_noise=0.1_exercise=c_tradeoff_OLS.pdf", bbox_inches='
 
 # n = 50
 data_d = readResultsFile("results/part=d_OLS/n=50_noise=0.1_results.txt")
-print(data_d)
+# print(data_d)
 
 k = data_d["k"]
 d = data_d["d"]
@@ -503,11 +503,9 @@ for n in num_points:
     # plt.show()
 
 
-
 # =====================================================================
-# COMPLETE PLOTTING SCRIPT FOR PARTS E AND F
+# HERE WE CAN CHANGE THE PLOT COLOURS
 # =====================================================================
-
 
 # Unified method styles with solid lines for all gradient descent variants
 method_styles = {
@@ -520,95 +518,97 @@ method_styles = {
 
 methods = list(method_styles.keys())
 models = ["OLS", "Ridge"]
-chosen_lambda = 0.01  # Fixed lambda matching Part F
+chosen_lambda = 0.01  # for Ridge
 
-# =====================================================================
-# PART E: MSE & R2 Comparisons (GD vs. Closed Form) + Iterations vs Degree
-# =====================================================================
+# ====================================================================================================
+# PART E: here we have two plotting scripts - one to plot MSE and R2 score for GD vs CF (both OLS and Ridge), 
+# and another one to test how many iterations it takes to reach convergence (based on the criterion we defined)
+# ====================================================================================================
 data_e = readResultsFile("results/part=e/n=100_noise=0.1_results.txt")
 
 # --- OLS MSE & R2 Comparisons ---
+
+# Extract the data we need
 ols_mask = data_e["model"] == "OLS"
 d_ols = data_e["d"][ols_mask]
-mse_gd_ols = data_e["MSE_GD"][ols_mask] if "MSE_GD" in data_e else None
-mse_cf_ols = data_e["MSE_CF"][ols_mask] if "MSE_CF" in data_e else None
-r2_gd_ols = data_e["R2_GD"][ols_mask] if "R2_GD" in data_e else None
-r2_cf_ols = data_e["R2_CF"][ols_mask] if "R2_CF" in data_e else None
+mse_gd_ols = data_e["MSE_GD"][ols_mask]
+mse_cf_ols = data_e["MSE_CF"][ols_mask]
+r2_gd_ols = data_e["R2_GD"][ols_mask]
+r2_cf_ols = data_e["R2_CF"][ols_mask]
 
-if mse_gd_ols is not None:
-    # OLS MSE Comparison (Thicker Blue GD underneath, Thinner Orange Dashed CF on top)
-    plt.figure(figsize=(3.7, 2.8))
-    plt.plot(d_ols, mse_gd_ols, label="Gradient descent", color="tab:blue", linestyle="-", linewidth=2.0, zorder=1)
-    plt.plot(d_ols, mse_cf_ols, label="Closed form", color="tab:orange", linestyle="--", linewidth=1.2, zorder=2)
-    plt.xlabel(r"Polynomial degree $(d)$")
-    plt.ylabel("MSE")
-    plt.grid(True)
-    plt.xlim(np.min(d_ols), np.max(d_ols))
-    plt.legend()
-    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
-    plt.tight_layout()
-    plt.savefig("figures/part=e_OLS_MSE_comparison.pdf", bbox_inches="tight")
-    plt.close()
 
-if r2_gd_ols is not None:
-    # OLS R2 Comparison (Thicker Blue GD underneath, Thinner Orange Dashed CF on top)
-    plt.figure(figsize=(3.7, 2.8))
-    plt.plot(d_ols, r2_gd_ols, label="Gradient descent", color="tab:blue", linestyle="-", linewidth=2.0, zorder=1)
-    plt.plot(d_ols, r2_cf_ols, label="Closed form", color="tab:orange", linestyle="--", linewidth=1.2, zorder=2)
-    plt.xlabel(r"Polynomial degree $(d)$")
-    plt.ylabel(r"$R^2$ Score")
-    plt.grid(True)
-    plt.xlim(np.min(d_ols), np.max(d_ols))
-    plt.legend()
-    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
-    plt.tight_layout()
-    plt.savefig("figures/part=e_OLS_R2_comparison.pdf", bbox_inches="tight")
-    plt.close()
+plt.figure(figsize=(3.7, 2.8))
+plt.plot(d_ols, mse_gd_ols, label="Gradient descent", color="tab:blue", linestyle="-", linewidth=2.0, zorder=1)
+plt.plot(d_ols, mse_cf_ols, label="Closed form", color="tab:orange", linestyle="--", linewidth=1.2, zorder=2)
+plt.xlabel(r"Polynomial degree $(d)$")
+plt.ylabel("MSE")
+plt.grid(True)
+plt.xlim(np.min(d_ols), np.max(d_ols))
+plt.legend()
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.tight_layout()
+plt.savefig("figures/part=e_OLS_MSE_comparison.pdf", bbox_inches="tight")
+plt.close()
 
-# --- Ridge MSE & R2 Comparisons ($\lambda = 0.01$) ---
+
+plt.figure(figsize=(3.7, 2.8))
+plt.plot(d_ols, r2_gd_ols, label="Gradient descent", color="tab:blue", linestyle="-", linewidth=2.0, zorder=1)
+plt.plot(d_ols, r2_cf_ols, label="Closed form", color="tab:orange", linestyle="--", linewidth=1.2, zorder=2)
+plt.xlabel(r"Polynomial degree $(d)$")
+plt.ylabel(r"$R^2$ Score")
+plt.grid(True)
+plt.xlim(np.min(d_ols), np.max(d_ols))
+plt.legend()
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.tight_layout()
+plt.savefig("figures/part=e_OLS_R2_comparison.pdf", bbox_inches="tight")
+plt.close()
+
+# --- Ridge MSE & R2 Comparisons ---
+
+# Extract the data
 ridge_mask = (data_e["model"] == "Ridge") & np.isclose(
     data_e["lambda"], chosen_lambda, rtol=1e-3, atol=1e-4
 )
 d_ridge = data_e["d"][ridge_mask]
-mse_gd_ridge = data_e["MSE_GD"][ridge_mask] if "MSE_GD" in data_e else None
-mse_cf_ridge = data_e["MSE_CF"][ridge_mask] if "MSE_CF" in data_e else None
-r2_gd_ridge = data_e["R2_GD"][ridge_mask] if "R2_GD" in data_e else None
-r2_cf_ridge = data_e["R2_CF"][ridge_mask] if "R2_CF" in data_e else None
+mse_gd_ridge = data_e["MSE_GD"][ridge_mask]
+mse_cf_ridge = data_e["MSE_CF"][ridge_mask]
+r2_gd_ridge = data_e["R2_GD"][ridge_mask]
+r2_cf_ridge = data_e["R2_CF"][ridge_mask]
 
-if mse_gd_ridge is not None:
-    # Ridge MSE Comparison (Thicker Blue GD underneath, Thinner Orange Dashed CF on top)
-    plt.figure(figsize=(3.7, 2.8))
-    plt.plot(d_ridge, mse_gd_ridge, label="Gradient descent", color="tab:blue", linestyle="-", linewidth=2.0, zorder=1)
-    plt.plot(d_ridge, mse_cf_ridge, label="Closed form", color="tab:orange", linestyle="--", linewidth=1.2, zorder=2)
-    plt.xlabel(r"Polynomial degree $(d)$")
-    plt.ylabel("MSE")
-    plt.grid(True)
-    plt.xlim(np.min(d_ridge), np.max(d_ridge))
-    plt.legend()
-    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
-    plt.tight_layout()
-    plt.savefig("figures/part=e_Ridge_MSE_comparison.pdf", bbox_inches="tight")
-    plt.close()
 
-if r2_gd_ridge is not None:
-    # Ridge R2 Comparison (Thicker Blue GD underneath, Thinner Orange Dashed CF on top)
-    plt.figure(figsize=(3.7, 2.8))
-    plt.plot(d_ridge, r2_gd_ridge, label="Gradient descent", color="tab:blue", linestyle="-", linewidth=2.0, zorder=1)
-    plt.plot(d_ridge, r2_cf_ridge, label="Closed form", color="tab:orange", linestyle="--", linewidth=1.2, zorder=2)
-    plt.xlabel(r"Polynomial degree $(d)$")
-    plt.ylabel(r"$R^2$ Score")
-    plt.grid(True)
-    plt.xlim(np.min(d_ridge), np.max(d_ridge))
-    plt.legend()
-    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
-    plt.tight_layout()
-    plt.savefig("figures/part=e_Ridge_R2_comparison.pdf", bbox_inches="tight")
-    plt.close()
+plt.figure(figsize=(3.7, 2.8))
+plt.plot(d_ridge, mse_gd_ridge, label="Gradient descent", color="tab:blue", linestyle="-", linewidth=2.0, zorder=1)
+plt.plot(d_ridge, mse_cf_ridge, label="Closed form", color="tab:orange", linestyle="--", linewidth=1.2, zorder=2)
+plt.xlabel(r"Polynomial degree $(d)$")
+plt.ylabel("MSE")
+plt.grid(True)
+plt.xlim(np.min(d_ridge), np.max(d_ridge))
+plt.legend()
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.tight_layout()
+plt.savefig("figures/part=e_Ridge_MSE_comparison.pdf", bbox_inches="tight")
+plt.close()
 
-# --- Part E Iterations vs Degree (Solid blue for both OLS and Ridge) ---
+
+plt.figure(figsize=(3.7, 2.8))
+plt.plot(d_ridge, r2_gd_ridge, label="Gradient descent", color="tab:blue", linestyle="-", linewidth=2.0, zorder=1)
+plt.plot(d_ridge, r2_cf_ridge, label="Closed form", color="tab:orange", linestyle="--", linewidth=1.2, zorder=2)
+plt.xlabel(r"Polynomial degree $(d)$")
+plt.ylabel(r"$R^2$ Score")
+plt.grid(True)
+plt.xlim(np.min(d_ridge), np.max(d_ridge))
+plt.legend()
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.tight_layout()
+plt.savefig("figures/part=e_Ridge_R2_comparison.pdf", bbox_inches="tight")
+plt.close()
+
+# --- Iterations to reach convergence ---
 for model_name in models:
     plt.figure(figsize=(4.5, 3.2))
     
+    # Extract the data
     if model_name == "OLS":
         m_mask = data_e["model"] == "OLS"
         degrees = data_e["d"][m_mask]
@@ -644,10 +644,15 @@ for model_name in models:
     plt.close()
 
 
-# =====================================================================
-# PART F - SECTION 1: Iterations vs. Polynomial Degree (GD Variants)
-# =====================================================================
+# ===========================================================================
+# PART F: in this part we have two plotting scripts - one to plot
+# the sensitivity to learning rate (for a fixed degree d = 5) and one to plot
+# the iterations required to reach a convergence threshold (for all degrees) 
+# with a fixed (initial) learning rate gamma = 0.01
+# ===========================================================================
 data_f = readResultsFile("results/part=f/n=100_type=iters_vs_degree_results.txt")
+
+# --- Iterations to reach convergence ---
 
 for model_name in models:
     plt.figure(figsize=(4.5, 3.2))
@@ -688,15 +693,15 @@ for model_name in models:
     plt.close()
 
 
-# =====================================================================
-# PART F - SECTION 2: Final Parameter Error vs. Initial Learning Rate
-# =====================================================================
+# --- Learning rate sensitivity (final theta error as a function of (initial) learning rate) ---
+
+
 sens_file = Path("results") / "part=f" / "n=100_type=lr_sensitivity_results.txt"
 
 if sens_file.exists():
     data_sens = pd.DataFrame(readResultsFile(sens_file))
 
-    # --- Plot A: OLS LR Sensitivity ---
+    # --- OLS LR Sensitivity ---
     fig, ax = plt.subplots(figsize=(6.5, 4.5), dpi=300)
     sub_sens_ols = data_sens[data_sens["lambda"] == 0.0]
 
@@ -713,7 +718,7 @@ if sens_file.exists():
             linestyle=style["linestyle"],
         )
 
-    ax.axhline(1e-8, color="black", linestyle="--", alpha=0.7, label=r"Convergence Threshold ($10^{-8}$)")
+    ax.axhline(1e-8, color="black", linestyle="--", alpha=0.7, label=r"Target ($10^{-8}$)")
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_ylim(1e-12, 1e3)
@@ -726,7 +731,7 @@ if sens_file.exists():
     plt.savefig("figures/part_f_lr_sensitivity_ols.pdf", bbox_inches="tight")
     plt.close()
 
-    # --- Plot B: Ridge LR Sensitivity ---
+    # --- Ridge LR Sensitivity ---
     fig, ax = plt.subplots(figsize=(6.5, 4.5), dpi=300)
     sub_sens_ridge = data_sens[data_sens["lambda"] == 0.01]
 
@@ -758,79 +763,87 @@ if sens_file.exists():
 
 
 
+# ======================================================================================================
+# PART H: in this part we have two plotting scripts - one to plot
+# final theta error as a function of total gradient evaluations (Adam with SDG, different batch sizes M),
+# another one it to compare fixed lr vs ler decaying schedule (BUT I NEED TO FIX THIS ONE I THINK)
+# P.s. this is done for polynomial degree d=5
+# ======================================================================================================
+
 
 degree = 5
 results_dir = Path("results") / "part=h"
+models = ["ols", "ridge"]
 
-# ==========================================
-# PLOT 1 & 2: Mini-Batch Size Sensitivity Sweep
-# ==========================================
-batch_file = results_dir / f"type=batch_sensitivity_degree={degree}_results.txt"
-batch_data = readResultsFile(batch_file)
+for model_name in models:
+    # --- File paths updated to load Adam results ---
+    batch_file = results_dir / f"type=batch_sensitivity_adam_{model_name}_degree={degree}_results.txt"
+    if not batch_file.exists():
+        continue
+        
+    batch_data = readResultsFile(batch_file)
+    unique_batches = np.unique(batch_data["batch_size"])
 
-fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.2), dpi=300)
-unique_batches = np.unique(batch_data["batch_size"])
+    # ==========================================
+    # Batch size error vs. total gradient evaluations
+    # ==========================================
+    fig, ax = plt.subplots(figsize=(3.5, 3.2), dpi=300)
+    for M in unique_batches:
+        mask = batch_data["batch_size"] == M
+        ax.plot(batch_data["total_evals"][mask], batch_data["final_param_error"][mask], label=f"M = {M}")
 
-# Subplot 1: Error vs Epochs
-ax1 = axes[0]
-for M in unique_batches:
-    mask = batch_data["batch_size"] == M
-    ax1.plot(batch_data["epoch"][mask], batch_data["final_param_error"][mask], label=f"M = {M}")
+    ax.axhline(1e-8, color="black", linestyle="--", alpha=0.6, label=r"Target ($10^{-8}$)")
+    ax.set_yscale("log")
+    ax.set_xscale("log")
+    ax.set_xlabel("Total Gradient Evaluations")
+    ax.set_ylabel(r"$\max |\boldsymbol{\theta}_{\mathrm{final}} - \boldsymbol{\theta}_{\mathrm{CF}}|$")
+    ax.grid(True, which="both", linestyle="--", alpha=0.4)
+    ax.legend(frameon=True, loc="upper right", fontsize=8)
+    
+    # Added bounds to frame target and evaluation budget
+    ax.set_ylim(bottom=1e-9, top=10.0)
+    ax.set_xlim(right=100000)
 
-ax1.set_yscale("log")
-ax1.set_xlabel("Epochs")
-ax1.set_ylabel(r"$\max |\boldsymbol{\theta}_{\mathrm{final}} - \boldsymbol{\theta}_{\mathrm{CF}}|$")
-ax1.set_title("Error vs. Epochs")
-ax1.grid(True, which="both", linestyle="--", alpha=0.4)
-ax1.legend(frameon=True, loc="upper right")
+    fig.subplots_adjust(left=0.22, right=0.95, bottom=0.18, top=0.92)
+    plt.savefig(f"figures/part_h_batch_sensitivity_adam_evals_{model_name}.pdf", bbox_inches="tight", pad_inches=0.2)
+    plt.close()
 
-# Subplot 2: Error vs Total Gradient Evaluations
-ax2 = axes[1]
-for M in unique_batches:
-    mask = batch_data["batch_size"] == M
-    ax2.plot(batch_data["total_evals"][mask], batch_data["final_param_error"][mask], label=f"M = {M}")
 
-ax2.set_yscale("log")
-ax2.set_xscale("log")
-ax2.set_xlabel("Total Single-Point Gradient Evaluations")
-ax2.set_ylabel(r"$\max |\boldsymbol{\theta}_{\mathrm{final}} - \boldsymbol{\theta}_{\mathrm{CF}}|$")
-ax2.set_title("Cost vs. Accuracy")
-ax2.grid(True, which="both", linestyle="--", alpha=0.4)
-ax2.legend(frameon=True, loc="upper right")
+    # ==========================================
+    # Constant vs. scheduled learning rate
+    # ==========================================
+    sched_file = results_dir / f"type=lr_schedule_adam_{model_name}_degree={degree}_results.txt"
+    if not sched_file.exists():
+        continue
+        
+    sched_data = readResultsFile(sched_file)
+    unique_schedules = np.unique(sched_data["schedule"])
+    colors = {"constant": "#d62728", "scheduled_1": "#1f77b4"}
+    labels = {"constant": r"Constant ($\gamma = 0.01$)", "scheduled_1": r"Scheduled ($t_0=5, t_1=50$)"}
 
-plt.tight_layout()
-Path("figures").mkdir(exist_ok=True)
-plt.savefig("figures/part_h_batch_size_comparison.pdf", bbox_inches="tight")
-plt.close()
+    fig, ax = plt.subplots(figsize=(3.5, 3.2), dpi=300)
+    for sched_name in unique_schedules:
+        mask = sched_data["schedule"] == sched_name
+        # Switched from epoch to total_evals to maintain consistent cost axis
+        ax.plot(
+            sched_data["total_evals"][mask], 
+            sched_data["final_param_error"][mask], 
+            label=labels.get(sched_name, sched_name), 
+            color=colors.get(sched_name, None)
+        )
 
-# ==========================================
-# PLOT 3: Constant vs. Scheduled Learning Rate
-# ==========================================
-sched_file = results_dir / f"type=lr_schedule_degree={degree}_results.txt"
-sched_data = readResultsFile(sched_file)
+    ax.axhline(1e-8, color="black", linestyle="--", alpha=0.6, label=r"Target ($10^{-8}$)")
+    ax.set_yscale("log")
+    ax.set_xscale("log")
+    ax.set_xlabel("Total Gradient Evaluations")
+    ax.set_ylabel(r"$\max |\boldsymbol{\theta}_{\mathrm{final}} - \boldsymbol{\theta}_{\mathrm{CF}}|$")
+    ax.grid(True, which="both", linestyle="--", alpha=0.4)
+    ax.legend(frameon=True, loc="lower left", fontsize=8)
 
-plt.figure(figsize=(3.5, 3.2), dpi=300)
-unique_schedules = np.unique(sched_data["schedule"])
-colors = {"constant": "#d62728", "scheduled_1": "#1f77b4"}
-labels = {"constant": r"Constant ($\gamma = 0.1$)", "scheduled_1": r"Scheduled ($t_0=5, t_1=50$)"}
+    # Consistent bounds for the schedule comparison plot
+    ax.set_ylim(bottom=1e-9, top=10.0)
+    ax.set_xlim(right=100000)
 
-for sched_name in unique_schedules:
-    mask = sched_data["schedule"] == sched_name
-    plt.plot(
-        sched_data["epoch"][mask], 
-        sched_data["final_param_error"][mask], 
-        label=labels.get(sched_name, sched_name), 
-        color=colors.get(sched_name, None)
-    )
-
-plt.axhline(1e-8, color="black", linestyle="--", alpha=0.6, label=r"Target ($10^{-8}$)")
-plt.yscale("log")
-plt.xlabel("Epochs")
-plt.ylabel(r"$\max |\boldsymbol{\theta}_{\mathrm{final}} - \boldsymbol{\theta}_{\mathrm{CF}}|$")
-plt.title("Constant vs. Scheduled SGD ($M=5$)")
-plt.grid(True, which="both", linestyle="--", alpha=0.4)
-plt.legend(frameon=True, loc="upper right")
-
-plt.tight_layout()
-plt.savefig("figures/part_h_lr_schedule_comparison.pdf", bbox_inches="tight")
-plt.close()
+    fig.subplots_adjust(left=0.28, right=0.92, bottom=0.18, top=0.92)
+    plt.savefig(f"figures/part_h_lr_schedule_adam_comparison_{model_name}.pdf", bbox_inches="tight", pad_inches=0.2)
+    plt.close()
