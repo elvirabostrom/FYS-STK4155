@@ -989,7 +989,7 @@ if sens_file.exists():
 
 degree = 5
 results_dir = Path("results") / "part=h"
-models = ["ols", "ridge"]
+models = ["ols", "ridge", "lasso"]
 
 for model_name in models:
     # --- File paths updated to load Adam results ---

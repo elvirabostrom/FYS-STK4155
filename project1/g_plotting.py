@@ -155,3 +155,89 @@ ax.grid(True, which = "both", linestyle = "--", alpha = 0.5)
 ax.legend(frameon = True, fontsize = 9, loc = "best")
 plt.savefig("figures/part_g_lr_sensitivity_lasso.pdf", bbox_inches="tight")
 plt.close()
+
+
+# ======================================================================================================
+# PART H: in this part we have two plotting scripts - one to plot
+# final theta error as a function of total gradient evaluations (Adam with SDG, different batch sizes M),
+# another one it to compare fixed lr vs ler decaying schedule (BUT I NEED TO FIX THIS ONE I THINK)
+# P.s. this is done for polynomial degree d=5
+# ======================================================================================================
+
+
+degree = 5
+results_dir = Path("results") / "part=h"
+models = ["ols", "ridge", "lasso"]
+
+for model_name in models:
+    # --- File paths updated to load Adam results ---
+    batch_file = results_dir / f"type=batch_sensitivity_adam_{model_name}_degree={degree}_results.txt"
+    if not batch_file.exists():
+        continue
+        
+    batch_data = readResultsFile(batch_file)
+    unique_batches = np.unique(batch_data["batch_size"])
+
+    # ==========================================
+    # Batch size error vs. total gradient evaluations
+    # ==========================================
+    fig, ax = plt.subplots(figsize=(3.5, 3.2), dpi=300)
+    for M in unique_batches:
+        mask = batch_data["batch_size"] == M
+        ax.plot(batch_data["total_evals"][mask], batch_data["final_param_error"][mask], label=f"M = {M}")
+
+    ax.axhline(1e-8, color="black", linestyle="--", alpha=0.6, label=r"Target ($10^{-8}$)")
+    ax.set_yscale("log")
+    ax.set_xscale("log")
+    ax.set_xlabel("Total Gradient Evaluations")
+    ax.set_ylabel(r"$\max |\boldsymbol{\theta}_{\mathrm{final}} - \boldsymbol{\theta}_{\mathrm{CF}}|$")
+    ax.grid(True, which="both", linestyle="--", alpha=0.4)
+    ax.legend(frameon=True, loc="upper right", fontsize=8)
+    
+    # Added bounds to frame target and evaluation budget
+    ax.set_ylim(bottom=1e-9, top=10.0)
+    ax.set_xlim(right=100000)
+
+    fig.subplots_adjust(left=0.22, right=0.95, bottom=0.18, top=0.92)
+    plt.savefig(f"figures/part_h_batch_sensitivity_adam_evals_{model_name}.pdf", bbox_inches="tight", pad_inches=0.2)
+    plt.close()
+
+
+    # ==========================================
+    # Constant vs. scheduled learning rate
+    # ==========================================
+    sched_file = results_dir / f"type=lr_schedule_adam_{model_name}_degree={degree}_results.txt"
+    if not sched_file.exists():
+        continue
+        
+    sched_data = readResultsFile(sched_file)
+    unique_schedules = np.unique(sched_data["schedule"])
+    colors = {"constant": "#d62728", "scheduled_1": "#1f77b4"}
+    labels = {"constant": r"Constant ($\gamma = 0.01$)", "scheduled_1": r"Scheduled ($t_0=5, t_1=50$)"}
+
+    fig, ax = plt.subplots(figsize=(3.5, 3.2), dpi=300)
+    for sched_name in unique_schedules:
+        mask = sched_data["schedule"] == sched_name
+        # Switched from epoch to total_evals to maintain consistent cost axis
+        ax.plot(
+            sched_data["total_evals"][mask], 
+            sched_data["final_param_error"][mask], 
+            label=labels.get(sched_name, sched_name), 
+            color=colors.get(sched_name, None)
+        )
+
+    ax.axhline(1e-8, color="black", linestyle="--", alpha=0.6, label=r"Target ($10^{-8}$)")
+    ax.set_yscale("log")
+    ax.set_xscale("log")
+    ax.set_xlabel("Total Gradient Evaluations")
+    ax.set_ylabel(r"$\max |\boldsymbol{\theta}_{\mathrm{final}} - \boldsymbol{\theta}_{\mathrm{CF}}|$")
+    ax.grid(True, which="both", linestyle="--", alpha=0.4)
+    ax.legend(frameon=True, loc="lower left", fontsize=8)
+
+    # Consistent bounds for the schedule comparison plot
+    ax.set_ylim(bottom=1e-9, top=10.0)
+    ax.set_xlim(right=100000)
+
+    fig.subplots_adjust(left=0.28, right=0.92, bottom=0.18, top=0.92)
+    plt.savefig(f"figures/part_h_lr_schedule_adam_comparison_{model_name}.pdf", bbox_inches="tight", pad_inches=0.2)
+    plt.close()

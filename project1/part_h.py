@@ -19,7 +19,7 @@ def step_length(t, t0, t1):
     return t0 / (t + t1)
 
 def sgd_fixed_steps(X, y, method="adam", total_target_steps=10000, batch_size=5, gamma=0.01, schedule=None,
-                    lam=0.0, seed=2026, theta0=None, **kw):
+                    lam=0.0, lasso=False, seed=2026, theta0=None, **kw):
     """Minibatch stochastic gradient descent running for a fixed total number of steps."""
     rng = np.random.default_rng(seed)
     n, p = X.shape
@@ -41,7 +41,9 @@ def sgd_fixed_steps(X, y, method="adam", total_target_steps=10000, batch_size=5,
             t += 1
             step_count += 1
             
-            if lam == 0.0:
+            if lasso:
+                g = GradLassoAnalytic(theta, X[batch], y[batch], lam)
+            elif lam == 0.0:
                 g = GradOLSAnalytic(theta, X[batch], y[batch])
             else:
                 g = GradRidgeAnalytic(theta, X[batch], y[batch], lam)
@@ -69,7 +71,8 @@ X_train_scaled, _, y_train_centered = scaleData(X, X, y)
 
 models = {
     "OLS": 0.0,
-    "Ridge": 0.01
+    "Ridge": 0.01,
+    "Lasso": 0.01
 }
 
 base_lr = 0.01 # learning rate for Adam
@@ -79,8 +82,11 @@ target_evals_budget = 100000  # we use max 10^5 total gradient evaluations (for 
 # --- 3. Generate data for plots ---
 
 for model_name, lam_val in models.items():
-    theta_cf = closedForm(X_train_scaled, y_train_centered, lamb=lam_val)
-
+    if model_name == "Lasso":
+        theta_cf = sklearnLasso(X_train_scaled, y_train_centered, lam_val)   # no closed form: sklearn reference
+    else:
+        theta_cf = closedForm(X_train_scaled, y_train_centered, lamb=lam_val)
+    
     # ----------------------------------------------------
     # Test batch size sensitivity
     # ----------------------------------------------------
@@ -93,7 +99,7 @@ for model_name, lam_val in models.items():
         hist, evals = sgd_fixed_steps(
             X_train_scaled, y_train_centered, method="adam", 
             total_target_steps=total_target_steps, batch_size=M, 
-            gamma=base_lr, lam=lam_val, schedule=None
+            gamma=base_lr, lam=lam_val, schedule=None, lasso=(model_name == "Lasso")
         )
         for idx, (theta_est, total_evals) in enumerate(zip(hist, evals)):
             param_error = np.max(np.abs(theta_est - theta_cf))
@@ -123,7 +129,7 @@ for model_name, lam_val in models.items():
         hist, evals = sgd_fixed_steps(
             X_train_scaled, y_train_centered, method="adam", 
             total_target_steps=total_target_steps, batch_size=sched_batch_size, 
-            gamma=base_lr, schedule=sched_params, lam=lam_val
+            gamma=base_lr, schedule=sched_params, lam=lam_val, lasso=(model_name == "Lasso")
         )
         for idx, (theta_est, total_evals) in enumerate(zip(hist, evals)):
             param_error = np.max(np.abs(theta_est - theta_cf))
