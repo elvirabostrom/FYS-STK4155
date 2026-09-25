@@ -376,7 +376,7 @@ plt.savefig(
     "figures/n=50_noise=0.1_exercise=d_MSE_OLS_CV.pdf",
     bbox_inches="tight"
 )
-plt.show()
+# plt.show()
 
 
 # n = 100
@@ -405,7 +405,7 @@ plt.savefig(
     "figures/n=100_noise=0.1_exercise=d_MSE_OLS_CV.pdf",
     bbox_inches="tight"
 )
-plt.show()
+# plt.show()
 
 
 # n = 500
@@ -441,7 +441,7 @@ plt.savefig(
     "figures/n=500_noise=0.1_exercise=d_MSE_OLS_CV.pdf",
     bbox_inches="tight"
 )
-plt.show()
+# plt.show()
 
 # -----------------------------------
 # Optimal lambda
@@ -508,7 +508,7 @@ plt.grid()
 plt.xlim(np.min(lamb_sorted), np.max(lamb_sorted))
 plt.tight_layout()
 plt.savefig("figures/n=100_noise=0.1_exercise=d_MSE_vs_lambda_Ridge_CV_d5.pdf", bbox_inches='tight')
-plt.show()
+# plt.show()
 # MSE as function of lambda for k = 5 and k = 10, n = 100 and d = 10
 data = readResultsFile("results/part=d_Ridge/n=100_noise=0.1_results.txt")
 chosen_degree = 10
@@ -526,7 +526,7 @@ plt.grid()
 plt.xlim(np.min(lamb_sorted), np.max(lamb_sorted))
 plt.tight_layout()
 plt.savefig("figures/n=100_noise=0.1_exercise=d_MSE_vs_lambda_Ridge_CV_d10.pdf", bbox_inches='tight')
-plt.show()
+# plt.show()
 # MSE as function of lambda for k = 5 and k = 10, n = 100 and d = 14
 data = readResultsFile("results/part=d_Ridge/n=100_noise=0.1_results.txt")
 chosen_degree = 14
@@ -549,7 +549,7 @@ plt.grid()
 plt.xlim(np.min(lamb_sorted), np.max(lamb_sorted))
 plt.tight_layout()
 plt.savefig("figures/n=100_noise=0.1_exercise=d_MSE_vs_lambda_Ridge_CV_d14.pdf", bbox_inches='tight')
-plt.show()
+# plt.show()
 
 
 
@@ -587,7 +587,7 @@ plt.savefig(
     "figures/n=50_noise=0.1_exercise=d_MSE_vs_degree_Ridge_CV.pdf",
     bbox_inches="tight"
 )
-plt.show()
+# plt.show()
 # MSE as function of polynomial degree for n = 100
 data = readResultsFile("results/part=d_Ridge/n=100_noise=0.1_results.txt")
 plt.figure(figsize=(2.4, 2.2))
@@ -619,7 +619,7 @@ plt.savefig(
     "figures/n=100_noise=0.1_exercise=d_MSE_vs_degree_Ridge_CV.pdf",
     bbox_inches="tight"
 )
-plt.show()
+# plt.show()
 # MSE as function of polynomial degree for n = 500
 data = readResultsFile("results/part=d_Ridge/n=500_noise=0.1_results.txt")
 plt.figure(figsize=(3.1, 2.2))
@@ -656,7 +656,7 @@ plt.savefig(
     "figures/n=500_noise=0.1_exercise=d_MSE_vs_degree_Ridge_CV.pdf",
     bbox_inches="tight"
 )
-plt.show()
+# plt.show()
 
 # # -----------------------------------
 # # Part D
@@ -735,6 +735,254 @@ method_styles = {
 methods = list(method_styles.keys())
 models = ["OLS", "Ridge"]
 chosen_lambda = 0.01  # for Ridge
+
+
+
+
+
+
+# =====================================================================
+# Exercise i) 
+# Optimal lambda for Lasso 
+# =====================================================================
+
+data = readResultsFile("results/part=i_Lasso/n=100_noise=0.1_results.txt")
+
+# k = 5
+k_val = 5
+mask = data["k"] == k_val
+idx_min = np.argmin(data["MSE"][mask])
+best_d = data["d"][mask][idx_min]
+best_lambda = data["lambda"][mask][idx_min]
+best_mse = data["MSE"][mask][idx_min]
+print(f"Lasso k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best_mse:.5f}")
+
+# k = 10
+k_val = 10
+mask = data["k"] == k_val
+idx_min = np.argmin(data["MSE"][mask])
+best_d = data["d"][mask][idx_min]
+best_lambda = data["lambda"][mask][idx_min]
+best_mse = data["MSE"][mask][idx_min]
+print(f"Lasso k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best_mse:.5f}")
+
+# Lasso k=5: optimal d=9, lambda=1e-10, MSE=0.09494
+# Lasso k=10: optimal d=8, lambda=1e-10, MSE=0.09377
+
+# -----------------------------------------------------------------------------------
+# Part i)
+# Compare MSE for OLS, Ridge and Lasso for different polynomial degrees
+# -----------------------------------------------------------------------------------
+
+# Read results
+data_ols = readResultsFile("results/part=d_OLS/n=100_noise=0.1_results.txt")
+data_ridge = readResultsFile("results/part=d_Ridge/n=100_noise=0.1_results.txt")
+data_lasso = readResultsFile(
+    "results/part=i_Lasso/n=100_noise=0.1_type=adam_vs_degree_results.txt"
+)
+
+# -------------------------------------------------------------
+# OLS, k = 10
+# -------------------------------------------------------------
+mask_ols = data_ols["k"] == 10
+
+d_ols = data_ols["d"][mask_ols]
+mse_ols = data_ols["MSE"][mask_ols]
+
+
+# -------------------------------------------------------------
+# Ridge, k = 10 and optimal lambda
+# -------------------------------------------------------------
+ridge_lamb = 8.11e-8
+
+mask_ridge = (
+    (data_ridge["k"] == 10)
+    & np.isclose(data_ridge["lambda"], ridge_lamb, rtol=0.05)
+)
+
+d_ridge = data_ridge["d"][mask_ridge]
+mse_ridge = data_ridge["MSE"][mask_ridge]
+
+
+# -------------------------------------------------------------
+# Lasso with Adam
+# -------------------------------------------------------------
+d_lasso = data_lasso["degree"]
+mse_lasso = data_lasso["MSE"]
+
+
+# -------------------------------------------------------------
+# Plot
+# -------------------------------------------------------------
+plt.figure(figsize=(3.1, 2.2))
+
+plt.plot(d_ols, mse_ols, label="OLS")
+plt.plot(d_ridge, mse_ridge, label="Ridge")
+plt.plot(d_lasso, mse_lasso, label="Lasso")
+
+plt.xlabel(r"Polynomial degree $(d)$")
+plt.ylabel("MSE")
+plt.xlim(1, 15)
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.grid()
+plt.legend()
+
+plt.tight_layout()
+
+plt.savefig(
+    "figures/n=100_noise=0.1_exercise=i_MSE_OLS_Ridge_Lasso.pdf"
+)
+
+plt.close()
+
+# -----------------------------------------------------------------------------------
+# Part i)
+# Plot data with optimal OLS, Ridge and Lasso models
+# -----------------------------------------------------------------------------------
+
+from sklearn.model_selection import train_test_split
+from utils import *
+
+# Parameters
+n = 100
+noise = 0.1
+seed = 2026
+
+# Optimal parameters from cross-validation with k = 10
+d_ols = 11
+
+d_ridge = 12
+lambda_ridge = 8.11e-8
+
+d_lasso = 8
+lambda_lasso = 1e-10
+
+# Adam parameters for Lasso
+gamma = 0.55
+target_tol = 1e-8
+max_iters_cap = 10000
+
+# Generate data
+x, y = MakeData(n, noise, seed + n)
+
+# Values used for plotting the fitted models
+x_plot = np.linspace(np.min(x), np.max(x), 500)
+
+
+# -------------------------------------------------------------
+# OLS
+# -------------------------------------------------------------
+
+X = MakeDesignMatrix(x, d_ols)
+X_plot = MakeDesignMatrix(x_plot, d_ols)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=69
+)
+
+X_train_scaled, X_plot_scaled, y_train_centered = scaleData(
+    X_train, X_plot, y_train
+)
+
+params_ols = closedForm(
+    X_train_scaled,
+    y_train_centered
+)
+
+y_plot_ols = X_plot_scaled @ params_ols + y_train.mean()
+
+
+# -------------------------------------------------------------
+# Ridge
+# -------------------------------------------------------------
+
+X = MakeDesignMatrix(x, d_ridge)
+X_plot = MakeDesignMatrix(x_plot, d_ridge)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=69
+)
+
+X_train_scaled, X_plot_scaled, y_train_centered = scaleData(
+    X_train, X_plot, y_train
+)
+
+params_ridge = closedForm(
+    X_train_scaled,
+    y_train_centered,
+    lamb=lambda_ridge
+)
+
+y_plot_ridge = X_plot_scaled @ params_ridge + y_train.mean()
+
+
+# -------------------------------------------------------------
+# Lasso with Adam
+# -------------------------------------------------------------
+
+X = MakeDesignMatrix(x, d_lasso)
+X_plot = MakeDesignMatrix(x_plot, d_lasso)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=69
+)
+
+X_train_scaled, X_plot_scaled, y_train_centered = scaleData(
+    X_train, X_plot, y_train
+)
+
+theta_init = np.zeros(X_train_scaled.shape[1])
+
+history_lasso = optimise(
+    grad=lambda th: GradLassoAnalytic(
+        th,
+        X_train_scaled,
+        y_train_centered,
+        lambda_lasso
+    ),
+    theta0=theta_init,
+    method="adam",
+    gamma=gamma,
+    num_iters=max_iters_cap,
+    tol=target_tol
+)
+
+params_lasso = history_lasso[-1]
+
+y_plot_lasso = X_plot_scaled @ params_lasso + y_train.mean()
+
+
+# -------------------------------------------------------------
+# Plot
+# -------------------------------------------------------------
+
+plt.figure(figsize=(3.7, 2.8))
+
+plt.scatter(x, y, label="Data", s=8)
+
+plt.plot(x_plot, y_plot_ols, label="OLS")
+plt.plot(x_plot, y_plot_ridge, label="Ridge")
+plt.plot(x_plot, y_plot_lasso, label="Lasso")
+
+plt.xlabel(r"$x$")
+plt.ylabel(r"$y$")
+plt.grid()
+plt.legend()
+
+plt.tight_layout()
+
+plt.savefig(
+    "figures/n=100_noise=0.1_exercise=i_OLS_Ridge_Lasso_data.pdf",
+    bbox_inches="tight"
+)
+
+plt.close()
+
+
+
+
+
+
 
 # ====================================================================================================
 # PART E: here we have two plotting scripts - one to plot MSE and R2 score for GD vs CF (both OLS and Ridge), 
