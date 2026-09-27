@@ -227,7 +227,7 @@ def soft_threshold(z, tau):
 # Scikit-learn's Lasso minimises (1/(2n))||y - X theta||^2 + alpha ||theta||_1,
 # i.e. our cost divided by 2, so alpha = lamb / 2.
 def sklearnLasso(X, y, lamb):
-    model = Lasso(alpha=lamb / 2.0, fit_intercept=False, max_iter=100000, tol=1e-10)
+    model = Lasso(alpha=lamb / 2.0, fit_intercept=False, max_iter=10000000, tol=1e-10)
     model.fit(X, y)
     return model.coef_
 

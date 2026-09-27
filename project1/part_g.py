@@ -193,3 +193,40 @@ for lr in learning_rates:
 
 writeToFile({"n": n, "noise": noise, "d": d_fixed, "lambda": lamb_lr,
              "type": "lr_sensitivity", "exercise": "g"}, results_lr)
+
+
+
+# =====================================================================
+# 5. The Lasso as a model: test MSE and sparsity versus lambda (d = 10)
+#    Compared with Ridge (closed form) and OLS; Adam shows that the
+#    optimizer choice hardly changes the predictions.
+# =====================================================================
+d_model = 10
+X_tr, X_te, y_c, y_tr, y_te = prepare(d_model)
+p = X_tr.shape[1]
+lambdas_model = np.logspace(-6, 0, 25)
+results_model = []
+
+theta_ols = closedForm(X_tr, y_c)
+mse_ols = MSE(X_te @ theta_ols + y_tr.mean(), y_te)
+
+for lamb in lambdas_model:
+    theta_lasso = sklearnLasso(X_tr, y_c, lamb)                       # exact Lasso
+    theta_ridge = closedForm(X_tr, y_c, lamb)                         # exact Ridge
+
+    def grad_model(theta, lamb=lamb):
+        return GradLassoAnalytic(theta, X_tr, y_c, lamb)
+    theta_adam = optimise(grad_model, np.zeros(p), "adam", gamma, num_iters=num_iters)[-1]
+
+    results_model.append({
+        "lambda": lamb,
+        "MSE_lasso": MSE(X_te @ theta_lasso + y_tr.mean(), y_te),
+        "MSE_lasso_adam": MSE(X_te @ theta_adam + y_tr.mean(), y_te),
+        "MSE_ridge": MSE(X_te @ theta_ridge + y_tr.mean(), y_te),
+        "MSE_ols": mse_ols,
+        "nonzero_lasso": int(np.sum(theta_lasso != 0)),
+    })
+    print(f"5. lambda = {lamb:.1e} done")
+
+writeToFile({"n": n, "noise": noise, "d": d_model, "type": "model_vs_lambda", "exercise": "g"},
+            results_model)

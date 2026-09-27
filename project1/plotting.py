@@ -1310,4 +1310,4 @@ for model_name in models:
 
     fig.subplots_adjust(left=0.28, right=0.92, bottom=0.18, top=0.92)
     plt.savefig(f"figures/part_h_lr_schedule_adam_comparison_{model_name}.pdf", bbox_inches="tight", pad_inches=0.2)
-    plt.close()
+    plt.close() 

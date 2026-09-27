@@ -241,3 +241,45 @@ for model_name in models:
     fig.subplots_adjust(left=0.28, right=0.92, bottom=0.18, top=0.92)
     plt.savefig(f"figures/part_h_lr_schedule_adam_comparison_{model_name}.pdf", bbox_inches="tight", pad_inches=0.2)
     plt.close()
+
+
+# ---------------------------------------------------------------------
+# Figure 5: the Lasso as a model, test MSE and sparsity versus lambda (d = 10)
+# ---------------------------------------------------------------------
+data_m = readResultsFile(res_g / "n=100_noise=0.1_d=10_type=model_vs_lambda_results.txt")
+lam_m        = data_m["lambda"]
+mse_lasso    = data_m["MSE_lasso"]
+mse_lassoAdm = data_m["MSE_lasso_adam"]
+mse_ridge    = data_m["MSE_ridge"]
+mse_ols      = data_m["MSE_ols"][0]
+nonzero      = data_m["nonzero_lasso"]
+
+# (a) test MSE versus lambda
+plt.figure(figsize=(3.4, 2.6))
+plt.plot(lam_m, mse_ridge, color = "palevioletred", label = "Ridge (exact)")
+plt.plot(lam_m, mse_lasso, color = "k",             label = "Lasso (exact)")
+plt.plot(lam_m, mse_lassoAdm, color = "k", linestyle = "none", marker = "*", markersize = 5,
+         label = "Lasso (Adam)")
+plt.axhline(mse_ols, color = "b",    linestyle = "--", linewidth = 1, label = "OLS")
+plt.axhline(0.01,    color = "grey", linestyle = ":",  linewidth = 1, label = r"$\sigma^2$")
+plt.xscale("log")
+plt.yscale("log")
+plt.xlabel(r"Penalty $(\lambda)$")
+plt.ylabel("Test MSE")
+plt.grid()
+plt.xlim(np.min(lam_m), np.max(lam_m))
+plt.legend(frameon = False, fontsize = 7)
+plt.savefig("figures/n=100_noise=0.1_exercise=g_MSE_vs_lambda_d10.pdf", bbox_inches='tight')
+plt.close()
+
+# (b) number of terms the Lasso keeps versus lambda
+plt.figure(figsize=(3.4, 2.6))
+plt.step(lam_m, nonzero, where = "mid", color = "k")
+plt.xscale("log")
+plt.xlabel(r"Penalty $(\lambda)$")
+plt.ylabel("Nonzero Lasso coefficients")
+plt.ylim(-0.5, 10.5)
+plt.grid()
+plt.xlim(np.min(lam_m), np.max(lam_m))
+plt.savefig("figures/n=100_noise=0.1_exercise=g_nonzero_vs_lambda_d10.pdf", bbox_inches='tight')
+plt.close()
