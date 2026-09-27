@@ -505,7 +505,7 @@ plt.xlabel(r"Penalty $(\lambda)$")
 plt.ylabel("MSE")
 plt.title("d = 5")
 plt.grid()
-plt.xlim(np.min(lamb_sorted), np.max(lamb_sorted))
+#plt.xlim(np.min(lamb_sorted), np.max(lamb_sorted))
 plt.tight_layout()
 plt.savefig("figures/n=100_noise=0.1_exercise=d_MSE_vs_lambda_Ridge_CV_d5.pdf", bbox_inches='tight')
 # plt.show()
@@ -523,7 +523,7 @@ plt.xscale("log")
 plt.xlabel(r"Penalty $(\lambda)$")
 plt.title("d = 10")
 plt.grid()
-plt.xlim(np.min(lamb_sorted), np.max(lamb_sorted))
+#plt.xlim(np.min(lamb_sorted), np.max(lamb_sorted))
 plt.tight_layout()
 plt.savefig("figures/n=100_noise=0.1_exercise=d_MSE_vs_lambda_Ridge_CV_d10.pdf", bbox_inches='tight')
 # plt.show()
@@ -550,7 +550,6 @@ plt.xlim(np.min(lamb_sorted), np.max(lamb_sorted))
 plt.tight_layout()
 plt.savefig("figures/n=100_noise=0.1_exercise=d_MSE_vs_lambda_Ridge_CV_d14.pdf", bbox_inches='tight')
 # plt.show()
-
 
 
 # MSE as function of d, for all different n, with set optimal lambda for each
@@ -725,11 +724,11 @@ plt.savefig(
 
 # Unified method styles with solid lines for all gradient descent variants
 method_styles = {
-    "plain": {"color": "tab:blue", "linestyle": "-", "label": "Plain GD"},
-    "momentum": {"color": "tab:orange", "linestyle": "-", "label": "Momentum"},
-    "adagrad": {"color": "tab:green", "linestyle": "-", "label": "AdaGrad"},
-    "rmsprop": {"color": "tab:red", "linestyle": "-", "label": "RMSprop"},
-    "adam": {"color": "tab:purple", "linestyle": "-", "label": "Adam"}
+    "plain": {"color": "gold", "linestyle": "-", "label": "Plain GD"},
+    "momentum": {"color": "black", "linestyle": "-", "label": "Momentum"},
+    "adagrad": {"color": "indianred", "linestyle": "-", "label": "AdaGrad"},
+    "rmsprop": {"color": "royalblue", "linestyle": "-", "label": "RMSprop"},
+    "adam": {"color": "yellowgreen", "linestyle": "-", "label": "Adam"}
 }
 
 methods = list(method_styles.keys())
@@ -741,242 +740,242 @@ chosen_lambda = 0.01  # for Ridge
 
 
 
-# =====================================================================
-# Exercise i) 
-# Optimal lambda for Lasso 
-# =====================================================================
+# # =====================================================================
+# # Exercise i) 
+# # Optimal lambda for Lasso 
+# # =====================================================================
 
-data = readResultsFile("results/part=i_Lasso/n=100_noise=0.1_results.txt")
+# data = readResultsFile("results/part=i_Lasso/n=100_noise=0.1_results.txt")
 
-# k = 5
-k_val = 5
-mask = data["k"] == k_val
-idx_min = np.argmin(data["MSE"][mask])
-best_d = data["d"][mask][idx_min]
-best_lambda = data["lambda"][mask][idx_min]
-best_mse = data["MSE"][mask][idx_min]
-print(f"Lasso k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best_mse:.5f}")
+# # k = 5
+# k_val = 5
+# mask = data["k"] == k_val
+# idx_min = np.argmin(data["MSE"][mask])
+# best_d = data["d"][mask][idx_min]
+# best_lambda = data["lambda"][mask][idx_min]
+# best_mse = data["MSE"][mask][idx_min]
+# print(f"Lasso k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best_mse:.5f}")
 
-# k = 10
-k_val = 10
-mask = data["k"] == k_val
-idx_min = np.argmin(data["MSE"][mask])
-best_d = data["d"][mask][idx_min]
-best_lambda = data["lambda"][mask][idx_min]
-best_mse = data["MSE"][mask][idx_min]
-print(f"Lasso k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best_mse:.5f}")
+# # k = 10
+# k_val = 10
+# mask = data["k"] == k_val
+# idx_min = np.argmin(data["MSE"][mask])
+# best_d = data["d"][mask][idx_min]
+# best_lambda = data["lambda"][mask][idx_min]
+# best_mse = data["MSE"][mask][idx_min]
+# print(f"Lasso k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best_mse:.5f}")
 
 # Lasso k=5: optimal d=9, lambda=1e-10, MSE=0.09494
 # Lasso k=10: optimal d=8, lambda=1e-10, MSE=0.09377
 
-# -----------------------------------------------------------------------------------
-# Part i)
-# Compare MSE for OLS, Ridge and Lasso for different polynomial degrees
-# -----------------------------------------------------------------------------------
+# # -----------------------------------------------------------------------------------
+# # Part i)
+# # Compare MSE for OLS, Ridge and Lasso for different polynomial degrees
+# # -----------------------------------------------------------------------------------
 
-# Read results
-data_ols = readResultsFile("results/part=d_OLS/n=100_noise=0.1_results.txt")
-data_ridge = readResultsFile("results/part=d_Ridge/n=100_noise=0.1_results.txt")
-data_lasso = readResultsFile(
-    "results/part=i_Lasso/n=100_noise=0.1_type=adam_vs_degree_results.txt"
-)
+# # Read results
+# data_ols = readResultsFile("results/part=d_OLS/n=100_noise=0.1_results.txt")
+# data_ridge = readResultsFile("results/part=d_Ridge/n=100_noise=0.1_results.txt")
+# data_lasso = readResultsFile(
+#     "results/part=i_Lasso/n=100_noise=0.1_type=adam_vs_degree_results.txt"
+# )
 
-# -------------------------------------------------------------
-# OLS, k = 10
-# -------------------------------------------------------------
-mask_ols = data_ols["k"] == 10
+# # -------------------------------------------------------------
+# # OLS, k = 10
+# # -------------------------------------------------------------
+# mask_ols = data_ols["k"] == 10
 
-d_ols = data_ols["d"][mask_ols]
-mse_ols = data_ols["MSE"][mask_ols]
-
-
-# -------------------------------------------------------------
-# Ridge, k = 10 and optimal lambda
-# -------------------------------------------------------------
-ridge_lamb = 8.11e-8
-
-mask_ridge = (
-    (data_ridge["k"] == 10)
-    & np.isclose(data_ridge["lambda"], ridge_lamb, rtol=0.05)
-)
-
-d_ridge = data_ridge["d"][mask_ridge]
-mse_ridge = data_ridge["MSE"][mask_ridge]
+# d_ols = data_ols["d"][mask_ols]
+# mse_ols = data_ols["MSE"][mask_ols]
 
 
-# -------------------------------------------------------------
-# Lasso with Adam
-# -------------------------------------------------------------
-d_lasso = data_lasso["degree"]
-mse_lasso = data_lasso["MSE"]
+# # -------------------------------------------------------------
+# # Ridge, k = 10 and optimal lambda
+# # -------------------------------------------------------------
+# ridge_lamb = 8.11e-8
+
+# mask_ridge = (
+#     (data_ridge["k"] == 10)
+#     & np.isclose(data_ridge["lambda"], ridge_lamb, rtol=0.05)
+# )
+
+# d_ridge = data_ridge["d"][mask_ridge]
+# mse_ridge = data_ridge["MSE"][mask_ridge]
 
 
-# -------------------------------------------------------------
-# Plot
-# -------------------------------------------------------------
-plt.figure(figsize=(3.1, 2.2))
-
-plt.plot(d_ols, mse_ols, label="OLS")
-plt.plot(d_ridge, mse_ridge, label="Ridge")
-plt.plot(d_lasso, mse_lasso, label="Lasso")
-
-plt.xlabel(r"Polynomial degree $(d)$")
-plt.ylabel("MSE")
-plt.xlim(1, 15)
-plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
-plt.grid()
-plt.legend()
-
-plt.tight_layout()
-
-plt.savefig(
-    "figures/n=100_noise=0.1_exercise=i_MSE_OLS_Ridge_Lasso.pdf"
-)
-
-plt.close()
-
-# -----------------------------------------------------------------------------------
-# Part i)
-# Plot data with optimal OLS, Ridge and Lasso models
-# -----------------------------------------------------------------------------------
-
-from sklearn.model_selection import train_test_split
-from utils import *
-
-# Parameters
-n = 100
-noise = 0.1
-seed = 2026
-
-# Optimal parameters from cross-validation with k = 10
-d_ols = 11
-
-d_ridge = 12
-lambda_ridge = 8.11e-8
-
-d_lasso = 8
-lambda_lasso = 1e-10
-
-# Adam parameters for Lasso
-gamma = 0.55
-target_tol = 1e-8
-max_iters_cap = 10000
-
-# Generate data
-x, y = MakeData(n, noise, seed + n)
-
-# Values used for plotting the fitted models
-x_plot = np.linspace(np.min(x), np.max(x), 500)
+# # -------------------------------------------------------------
+# # Lasso with Adam
+# # -------------------------------------------------------------
+# d_lasso = data_lasso["degree"]
+# mse_lasso = data_lasso["MSE"]
 
 
-# -------------------------------------------------------------
-# OLS
-# -------------------------------------------------------------
+# # -------------------------------------------------------------
+# # Plot
+# # -------------------------------------------------------------
+# plt.figure(figsize=(3.1, 2.2))
 
-X = MakeDesignMatrix(x, d_ols)
-X_plot = MakeDesignMatrix(x_plot, d_ols)
+# plt.plot(d_ols, mse_ols, label="OLS", color = "midnightblue")
+# plt.plot(d_ridge, mse_ridge, label="Ridge", color = "maroon")
+# plt.plot(d_lasso, mse_lasso, label="Lasso", color = "green")
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=69
-)
+# plt.xlabel(r"Polynomial degree $(d)$")
+# plt.ylabel("MSE")
+# plt.xlim(1, 15)
+# plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+# plt.grid()
+# plt.legend()
 
-X_train_scaled, X_plot_scaled, y_train_centered = scaleData(
-    X_train, X_plot, y_train
-)
+# plt.tight_layout()
 
-params_ols = closedForm(
-    X_train_scaled,
-    y_train_centered
-)
+# plt.savefig(
+#     "figures/n=100_noise=0.1_exercise=i_MSE_OLS_Ridge_Lasso.pdf"
+# )
 
-y_plot_ols = X_plot_scaled @ params_ols + y_train.mean()
+# plt.close()
 
+# # -----------------------------------------------------------------------------------
+# # Part i)
+# # Plot data with optimal OLS, Ridge and Lasso models
+# # -----------------------------------------------------------------------------------
 
-# -------------------------------------------------------------
-# Ridge
-# -------------------------------------------------------------
+# from sklearn.model_selection import train_test_split
+# from utils import *
 
-X = MakeDesignMatrix(x, d_ridge)
-X_plot = MakeDesignMatrix(x_plot, d_ridge)
+# # Parameters
+# n = 100
+# noise = 0.1
+# seed = 2026
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=69
-)
+# # Optimal parameters from cross-validation with k = 10
+# d_ols = 11
 
-X_train_scaled, X_plot_scaled, y_train_centered = scaleData(
-    X_train, X_plot, y_train
-)
+# d_ridge = 12
+# lambda_ridge = 8.11e-8
 
-params_ridge = closedForm(
-    X_train_scaled,
-    y_train_centered,
-    lamb=lambda_ridge
-)
+# d_lasso = 8
+# lambda_lasso = 1e-10
 
-y_plot_ridge = X_plot_scaled @ params_ridge + y_train.mean()
+# # Adam parameters for Lasso
+# gamma = 0.55
+# target_tol = 1e-8
+# max_iters_cap = 10000
 
+# # Generate data
+# x, y = MakeData(n, noise, seed + n)
 
-# -------------------------------------------------------------
-# Lasso with Adam
-# -------------------------------------------------------------
-
-X = MakeDesignMatrix(x, d_lasso)
-X_plot = MakeDesignMatrix(x_plot, d_lasso)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=69
-)
-
-X_train_scaled, X_plot_scaled, y_train_centered = scaleData(
-    X_train, X_plot, y_train
-)
-
-theta_init = np.zeros(X_train_scaled.shape[1])
-
-history_lasso = optimise(
-    grad=lambda th: GradLassoAnalytic(
-        th,
-        X_train_scaled,
-        y_train_centered,
-        lambda_lasso
-    ),
-    theta0=theta_init,
-    method="adam",
-    gamma=gamma,
-    num_iters=max_iters_cap,
-    tol=target_tol
-)
-
-params_lasso = history_lasso[-1]
-
-y_plot_lasso = X_plot_scaled @ params_lasso + y_train.mean()
+# # Values used for plotting the fitted models
+# x_plot = np.linspace(np.min(x), np.max(x), 500)
 
 
-# -------------------------------------------------------------
-# Plot
-# -------------------------------------------------------------
+# # -------------------------------------------------------------
+# # OLS
+# # -------------------------------------------------------------
 
-plt.figure(figsize=(3.7, 2.8))
+# X = MakeDesignMatrix(x, d_ols)
+# X_plot = MakeDesignMatrix(x_plot, d_ols)
 
-plt.scatter(x, y, label="Data", s=8)
+# X_train, X_test, y_train, y_test = train_test_split(
+#     X, y, test_size=0.2, random_state=69
+# )
 
-plt.plot(x_plot, y_plot_ols, label="OLS")
-plt.plot(x_plot, y_plot_ridge, label="Ridge")
-plt.plot(x_plot, y_plot_lasso, label="Lasso")
+# X_train_scaled, X_plot_scaled, y_train_centered = scaleData(
+#     X_train, X_plot, y_train
+# )
 
-plt.xlabel(r"$x$")
-plt.ylabel(r"$y$")
-plt.grid()
-plt.legend()
+# params_ols = closedForm(
+#     X_train_scaled,
+#     y_train_centered
+# )
 
-plt.tight_layout()
+# y_plot_ols = X_plot_scaled @ params_ols + y_train.mean()
 
-plt.savefig(
-    "figures/n=100_noise=0.1_exercise=i_OLS_Ridge_Lasso_data.pdf",
-    bbox_inches="tight"
-)
 
-plt.close()
+# # -------------------------------------------------------------
+# # Ridge
+# # -------------------------------------------------------------
+
+# X = MakeDesignMatrix(x, d_ridge)
+# X_plot = MakeDesignMatrix(x_plot, d_ridge)
+
+# X_train, X_test, y_train, y_test = train_test_split(
+#     X, y, test_size=0.2, random_state=69
+# )
+
+# X_train_scaled, X_plot_scaled, y_train_centered = scaleData(
+#     X_train, X_plot, y_train
+# )
+
+# params_ridge = closedForm(
+#     X_train_scaled,
+#     y_train_centered,
+#     lamb=lambda_ridge
+# )
+
+# y_plot_ridge = X_plot_scaled @ params_ridge + y_train.mean()
+
+
+# # -------------------------------------------------------------
+# # Lasso with Adam
+# # -------------------------------------------------------------
+
+# X = MakeDesignMatrix(x, d_lasso)
+# X_plot = MakeDesignMatrix(x_plot, d_lasso)
+
+# X_train, X_test, y_train, y_test = train_test_split(
+#     X, y, test_size=0.2, random_state=69
+# )
+
+# X_train_scaled, X_plot_scaled, y_train_centered = scaleData(
+#     X_train, X_plot, y_train
+# )
+
+# theta_init = np.zeros(X_train_scaled.shape[1])
+
+# history_lasso = optimise(
+#     grad=lambda th: GradLassoAnalytic(
+#         th,
+#         X_train_scaled,
+#         y_train_centered,
+#         lambda_lasso
+#     ),
+#     theta0=theta_init,
+#     method="adam",
+#     gamma=gamma,
+#     num_iters=max_iters_cap,
+#     tol=target_tol
+# )
+
+# params_lasso = history_lasso[-1]
+
+# y_plot_lasso = X_plot_scaled @ params_lasso + y_train.mean()
+
+
+# # -------------------------------------------------------------
+# # Plot
+# # -------------------------------------------------------------
+
+# plt.figure(figsize=(3.7, 2.8))
+
+# plt.scatter(x, y, label="Data", s=8, color = "grey")
+
+# plt.plot(x_plot, y_plot_ols, label="OLS", color = "midnightblue")
+# plt.plot(x_plot, y_plot_ridge, label="maroon")
+# plt.plot(x_plot, y_plot_lasso, label="green")
+
+# plt.xlabel(r"$x$")
+# plt.ylabel(r"$y$")
+# plt.grid()
+# plt.legend()
+
+# plt.tight_layout()
+
+# plt.savefig(
+#     "figures/n=100_noise=0.1_exercise=i_OLS_Ridge_Lasso_data.pdf",
+#     bbox_inches="tight"
+# )
+
+# plt.close()
 
 
 
@@ -1001,30 +1000,31 @@ r2_gd_ols = data_e["R2_GD"][ols_mask]
 r2_cf_ols = data_e["R2_CF"][ols_mask]
 
 
-plt.figure(figsize=(3.7, 2.8))
-plt.plot(d_ols, mse_gd_ols, label="Gradient descent", color="tab:blue", linestyle="-", linewidth=2.0, zorder=1)
-plt.plot(d_ols, mse_cf_ols, label="Closed form", color="tab:orange", linestyle="--", linewidth=1.2, zorder=2)
+plt.figure(figsize=(3.0, 2.8))
+plt.plot(d_ols, mse_gd_ols, label="Gradient descent", color="royalblue", linestyle="-", linewidth=2.0, zorder=1)
+plt.plot(d_ols, mse_cf_ols, label="Closed form", color="red", linestyle="--", linewidth=1.2, zorder=2)
 plt.xlabel(r"Polynomial degree $(d)$")
 plt.ylabel("MSE")
+plt.title("OLS")
 plt.grid(True)
 plt.xlim(np.min(d_ols), np.max(d_ols))
-plt.legend()
 plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
 plt.savefig("figures/part=e_OLS_MSE_comparison.pdf", bbox_inches="tight")
 plt.close()
 
 
-plt.figure(figsize=(3.7, 2.8))
-plt.plot(d_ols, r2_gd_ols, label="Gradient descent", color="tab:blue", linestyle="-", linewidth=2.0, zorder=1)
-plt.plot(d_ols, r2_cf_ols, label="Closed form", color="tab:orange", linestyle="--", linewidth=1.2, zorder=2)
+plt.figure(figsize=(3.0, 2.8))
+plt.plot(d_ols, r2_gd_ols, label="Gradient descent", color="royalblue", linestyle="-", linewidth=2.0, zorder=1)
+plt.plot(d_ols, r2_cf_ols, label="Closed form", color="red", linestyle="--", linewidth=1.2, zorder=2)
 plt.xlabel(r"Polynomial degree $(d)$")
 plt.ylabel(r"$R^2$ Score")
 plt.grid(True)
+plt.title("OLS")
+plt.legend(frameon=False)
 plt.xlim(np.min(d_ols), np.max(d_ols))
-plt.legend()
-plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
+plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.savefig("figures/part=e_OLS_R2_comparison.pdf", bbox_inches="tight")
 plt.close()
 
@@ -1041,28 +1041,28 @@ r2_gd_ridge = data_e["R2_GD"][ridge_mask]
 r2_cf_ridge = data_e["R2_CF"][ridge_mask]
 
 
-plt.figure(figsize=(3.7, 2.8))
-plt.plot(d_ridge, mse_gd_ridge, label="Gradient descent", color="tab:blue", linestyle="-", linewidth=2.0, zorder=1)
-plt.plot(d_ridge, mse_cf_ridge, label="Closed form", color="tab:orange", linestyle="--", linewidth=1.2, zorder=2)
+plt.figure(figsize=(3.0, 2.8))
+plt.plot(d_ridge, mse_gd_ridge, label="Gradient descent", color="royalblue", linestyle="-", linewidth=2.0, zorder=1)
+plt.plot(d_ridge, mse_cf_ridge, label="Closed form", color="red", linestyle="--", linewidth=1.2, zorder=2)
 plt.xlabel(r"Polynomial degree $(d)$")
 plt.ylabel("MSE")
 plt.grid(True)
+plt.title("Ridge")
 plt.xlim(np.min(d_ridge), np.max(d_ridge))
-plt.legend()
 plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
 plt.savefig("figures/part=e_Ridge_MSE_comparison.pdf", bbox_inches="tight")
 plt.close()
 
 
-plt.figure(figsize=(3.7, 2.8))
-plt.plot(d_ridge, r2_gd_ridge, label="Gradient descent", color="tab:blue", linestyle="-", linewidth=2.0, zorder=1)
-plt.plot(d_ridge, r2_cf_ridge, label="Closed form", color="tab:orange", linestyle="--", linewidth=1.2, zorder=2)
+plt.figure(figsize=(3.0, 2.8))
+plt.plot(d_ridge, r2_gd_ridge, label="Gradient descent", color="royalblue", linestyle="-", linewidth=2.0, zorder=1)
+plt.plot(d_ridge, r2_cf_ridge, label="Closed form", color="red", linestyle="--", linewidth=1.2, zorder=2)
 plt.xlabel(r"Polynomial degree $(d)$")
 plt.ylabel(r"$R^2$ Score")
 plt.grid(True)
 plt.xlim(np.min(d_ridge), np.max(d_ridge))
-plt.legend()
+plt.title("Ridge")
 plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.tight_layout()
 plt.savefig("figures/part=e_Ridge_R2_comparison.pdf", bbox_inches="tight")
@@ -1070,13 +1070,14 @@ plt.close()
 
 # --- Iterations to reach convergence ---
 for model_name in models:
-    plt.figure(figsize=(4.5, 3.2))
-    
+    plt.figure(figsize=(3.0, 2.5))
+    plt.title(model_name)
     # Extract the data
     if model_name == "OLS":
         m_mask = data_e["model"] == "OLS"
         degrees = data_e["d"][m_mask]
         iters = data_e["iters_needed"][m_mask]
+        plt.ylabel(r"Iterations to reach $\|\mathbf{g}\| < 10^{-8}$")
     else:
         m_mask = data_e["model"] == "Ridge"
         l_mask = m_mask & np.isclose(data_e["lambda"], chosen_lambda, rtol=1e-3, atol=1e-4)
@@ -1086,21 +1087,21 @@ for model_name in models:
     plt.plot(
         degrees,
         iters,
-        color="tab:blue",
+        color="midnightblue",
         linestyle="-",
         linewidth=1.5
     )
 
     # Plot 10,000 iteration cap line
-    plt.axhline(10000, color="black", linestyle="--", alpha=0.5, linewidth=1.0, label="Iteration cap")
+    plt.axhline(10000, color="red", linestyle="--", alpha=0.5, linewidth=1.0, label="Iteration cap")
 
     plt.xlabel(r"Polynomial degree $(d)$")
-    plt.ylabel(r"Iterations to reach $\|\mathbf{g}\| < 10^{-8}$")
     plt.yscale("log")
     plt.ylim(1, 20000)
+    plt.legend(fontsize=10, frameon=True)
     plt.grid(True, which="both", linestyle="--", alpha=0.5)
-    plt.legend(fontsize=7, loc="best", frameon=True)
     plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+    plt.xlim(1, 15)
     plt.tight_layout()
     
     filename = f"figures/part=e_{model_name.lower()}_iters_vs_degree.pdf"
@@ -1118,19 +1119,21 @@ data_f = readResultsFile("results/part=f/n=100_type=iters_vs_degree_results.txt"
 
 # --- Iterations to reach convergence ---
 
+figsizes = {"OLS": (3.0, 2.5), "Ridge": (4.2, 2.5)}
+
 for model_name in models:
-    plt.figure(figsize=(4.5, 3.2))
-    
+    plt.figure(figsize=figsizes[model_name])
+
     model_mask = data_f["model"] == model_name
-    
+
     for method, style in method_styles.items():
         method_mask = model_mask & (data_f["method"] == method)
         if not np.any(method_mask):
             continue
-            
+
         degrees = data_f["degree"][method_mask]
         iters = data_f["iters_needed"][method_mask]
-        
+
         plt.plot(
             degrees,
             iters,
@@ -1141,17 +1144,23 @@ for model_name in models:
         )
 
     # Plot 10,000 iteration cap line
-    plt.axhline(10000, color="black", linestyle="--", alpha=0.5, linewidth=1.0, label="Iteration cap")
+    plt.axhline(10000, color="red", linestyle="--", alpha=0.5, linewidth=1.0, label="Iteration cap")
 
+    plt.title(model_name)
     plt.xlabel(r"Polynomial degree $(d)$")
-    plt.ylabel(r"Iterations to reach $\|\mathbf{g}\| < 10^{-8}$")
+
+    if model_name == "OLS":
+        plt.ylabel(r"Iterations to reach $\|\mathbf{g}\| < 10^{-8}$")
+    else:
+        plt.legend(loc="upper left", bbox_to_anchor=(1.02, 1), frameon=False)
+
     plt.yscale("log")
     plt.ylim(1, 20000)
+    plt.xlim(1, 15)
     plt.grid(True, which="both", linestyle="--", alpha=0.5)
-    plt.legend(fontsize=7, loc="best", frameon=True)
     plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
     plt.tight_layout()
-    
+
     filename = f"figures/part=f_{model_name}_iters_vs_degree.pdf"
     plt.savefig(filename, bbox_inches="tight")
     plt.close()
@@ -1160,70 +1169,57 @@ for model_name in models:
 # --- Learning rate sensitivity (final theta error as a function of (initial) learning rate) ---
 
 
-sens_file = Path("results") / "part=f" / "n=100_type=lr_sensitivity_results.txt"
-
-if sens_file.exists():
-    data_sens = pd.DataFrame(readResultsFile(sens_file))
-
-    # --- OLS LR Sensitivity ---
-    fig, ax = plt.subplots(figsize=(6.5, 4.5), dpi=300)
-    sub_sens_ols = data_sens[data_sens["lambda"] == 0.0]
-
+def lr_sens_plot(lr, err, meth, figsize, filename, title, ylabel=None, legend=False, extra=None):
+    fig, ax = plt.subplots(figsize=figsize)
     for method, style in method_styles.items():
-        mask = sub_sens_ols["method"] == method
-        if not np.any(mask):
-            continue
-        ax.plot(
-            sub_sens_ols["learning_rate"][mask],
-            sub_sens_ols["final_param_error"][mask],
-            color=style["color"],
-            label=style["label"],
-            linewidth=1.8,
-            linestyle=style["linestyle"],
-        )
-
+        mask = meth == method
+        if np.any(mask):
+            ax.plot(lr[mask], err[mask], color=style["color"], linestyle=style["linestyle"],
+                    linewidth=1.8, label=style["label"])
+    if extra is not None:  # soft thresholding (only Lasso)
+        mask = meth == extra["method"]
+        ax.plot(lr[mask], err[mask], color=extra["color"], linestyle=extra["linestyle"],
+                linewidth=1.8, label=extra["label"])
     ax.axhline(1e-8, color="black", linestyle="--", alpha=0.7, label=r"Target ($10^{-8}$)")
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_ylim(1e-12, 1e3)
-    ax.set_xlabel(r"Initial learning rate ($\gamma$)", fontsize=11)
-    ax.set_ylabel(r"$\max |\boldsymbol{\theta}_{\mathrm{final}} - \boldsymbol{\theta}_{\mathrm{CF}}|$", fontsize=11)
+    ax.set_title(title)
+    ax.set_xlim(np.min(lr), np.max(lr))
+    ax.set_xlabel(r"Initial learning rate ($\gamma$)")
+    if ylabel is not None:
+        ax.set_ylabel(ylabel)
     ax.grid(True, which="both", linestyle="--", alpha=0.5)
-    ax.legend(frameon=True, fontsize=9, loc="best")
-
+    if legend:
+        ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1), frameon=False)
     plt.tight_layout()
-    plt.savefig("figures/part_f_lr_sensitivity_ols.pdf", bbox_inches="tight")
+    plt.savefig(filename, bbox_inches="tight")
     plt.close()
 
-    # --- Ridge LR Sensitivity ---
-    fig, ax = plt.subplots(figsize=(6.5, 4.5), dpi=300)
-    sub_sens_ridge = data_sens[data_sens["lambda"] == 0.01]
 
-    for method, style in method_styles.items():
-        mask = sub_sens_ridge["method"] == method
-        if not np.any(mask):
-            continue
-        ax.plot(
-            sub_sens_ridge["learning_rate"][mask],
-            sub_sens_ridge["final_param_error"][mask],
-            color=style["color"],
-            label=style["label"],
-            linewidth=1.8,
-            linestyle=style["linestyle"],
-        )
+# OLS and Ridge (part f)
+data_sens = readResultsFile(Path("results") / "part=f" / "n=100_type=lr_sensitivity_results.txt")
+lam = data_sens["lambda"]
 
-    ax.axhline(1e-8, color="black", linestyle="--", alpha=0.7, label=r"Convergence Threshold ($10^{-8}$)")
-    ax.set_xscale("log")
-    ax.set_yscale("log")
-    ax.set_ylim(1e-12, 1e3)
-    ax.set_xlabel(r"Initial learning rate ($\gamma$)", fontsize=11)
-    ax.set_ylabel(r"$\max |\boldsymbol{\theta}_{\mathrm{final}} - \boldsymbol{\theta}_{\mathrm{CF}}|$", fontsize=11)
-    ax.grid(True, which="both", linestyle="--", alpha=0.5)
-    ax.legend(frameon=True, fontsize=9, loc="best")
+ols = lam == 0.0
+lr_sens_plot(data_sens["learning_rate"][ols], data_sens["final_param_error"][ols],
+             data_sens["method"][ols], figsize=(3.0, 2.3), title="OLS",
+             filename="figures/part_f_lr_sensitivity_ols.pdf",
+             ylabel=r"$\max |\boldsymbol{\theta}_{\mathrm{final}} - \boldsymbol{\theta}_{\mathrm{CF}}|$")
 
-    plt.tight_layout()
-    plt.savefig("figures/part_f_lr_sensitivity_ridge.pdf", bbox_inches="tight")
-    plt.close()
+ridge = lam == 0.01
+lr_sens_plot(data_sens["learning_rate"][ridge], data_sens["final_param_error"][ridge],
+             data_sens["method"][ridge], figsize=(3.0, 2.3), title="Ridge",
+             filename="figures/part_f_lr_sensitivity_ridge.pdf")
+
+# Lasso (part g)
+data_lr = readResultsFile(Path("results") / "part=g" / "n=100_noise=0.1_d=5_lambda=0.01_type=lr_sensitivity_results.txt")
+lr_sens_plot(data_lr["learning_rate"], data_lr["final_param_error"], data_lr["method"],
+             figsize=(4.7, 2.3), title="Lasso", filename="figures/part_g_lr_sensitivity_lasso.pdf",
+             ylabel=r"$\max |\boldsymbol{\theta}_{\mathrm{final}} - \boldsymbol{\theta}_{\mathrm{sklearn}}|$",
+             legend=True,
+             extra={"method": "soft_threshold", "color": "darkorange",
+                    "linestyle": "-.", "label": "Soft thresholding"})
 
 
 
@@ -1238,6 +1234,8 @@ if sens_file.exists():
 degree = 5
 results_dir = Path("results") / "part=h"
 models = ["ols", "ridge", "lasso"]
+titles = {"ols": "OLS", "ridge": "Ridge", "lasso": "Lasso"}
+figsizes_h = {"ols": (2.8, 2.5), "ridge": (2.7, 2.5), "lasso": (5.2, 2.5)}
 
 for model_name in models:
     # --- File paths updated to load Adam results ---
@@ -1247,29 +1245,34 @@ for model_name in models:
         
     batch_data = readResultsFile(batch_file)
     unique_batches = np.unique(batch_data["batch_size"])
+    palette = [style["color"] for style in method_styles.values()]
 
     # ==========================================
     # Batch size error vs. total gradient evaluations
     # ==========================================
-    fig, ax = plt.subplots(figsize=(3.5, 3.2), dpi=300)
-    for M in unique_batches:
+    fig, ax = plt.subplots(figsize=figsizes_h[model_name])
+    for i, M in enumerate(unique_batches):
         mask = batch_data["batch_size"] == M
-        ax.plot(batch_data["total_evals"][mask], batch_data["final_param_error"][mask], label=f"M = {M}")
+        ax.plot(batch_data["total_evals"][mask], batch_data["final_param_error"][mask],
+            label=f"M = {M}", color=palette[i])
 
     ax.axhline(1e-8, color="black", linestyle="--", alpha=0.6, label=r"Target ($10^{-8}$)")
     ax.set_yscale("log")
     ax.set_xscale("log")
+    ax.set_title(titles[model_name])
     ax.set_xlabel("Total Gradient Evaluations")
-    ax.set_ylabel(r"$\max |\boldsymbol{\theta}_{\mathrm{final}} - \boldsymbol{\theta}_{\mathrm{CF}}|$")
+    if model_name == "ols":
+        ax.set_ylabel(r"$\max |\boldsymbol{\theta}_{\mathrm{final}} - \boldsymbol{\theta}_{\mathrm{CF}}|$")
+    if model_name == "lasso":
+        ax.set_ylabel(r"$\max |\boldsymbol{\theta}_{\mathrm{final}} - \boldsymbol{\theta}_{\mathrm{sklearn}}|$")
+        ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1), frameon=False)
     ax.grid(True, which="both", linestyle="--", alpha=0.4)
-    ax.legend(frameon=True, loc="upper right", fontsize=8)
-    
-    # Added bounds to frame target and evaluation budget
+
     ax.set_ylim(bottom=1e-9, top=10.0)
     ax.set_xlim(right=100000)
 
-    fig.subplots_adjust(left=0.22, right=0.95, bottom=0.18, top=0.92)
-    plt.savefig(f"figures/part_h_batch_sensitivity_adam_evals_{model_name}.pdf", bbox_inches="tight", pad_inches=0.2)
+    plt.tight_layout()
+    plt.savefig(f"figures/part_h_batch_sensitivity_adam_evals_{model_name}.pdf", bbox_inches="tight")
     plt.close()
 
 
@@ -1279,35 +1282,37 @@ for model_name in models:
     sched_file = results_dir / f"type=lr_schedule_adam_{model_name}_degree={degree}_results.txt"
     if not sched_file.exists():
         continue
-        
+
     sched_data = readResultsFile(sched_file)
     unique_schedules = np.unique(sched_data["schedule"])
     colors = {"constant": "#d62728", "scheduled_1": "#1f77b4"}
     labels = {"constant": r"Constant ($\gamma = 0.01$)", "scheduled_1": r"Scheduled ($t_0=5, t_1=50$)"}
 
-    fig, ax = plt.subplots(figsize=(3.5, 3.2), dpi=300)
+    fig, ax = plt.subplots(figsize=figsizes_h[model_name])
     for sched_name in unique_schedules:
         mask = sched_data["schedule"] == sched_name
-        # Switched from epoch to total_evals to maintain consistent cost axis
         ax.plot(
-            sched_data["total_evals"][mask], 
-            sched_data["final_param_error"][mask], 
-            label=labels.get(sched_name, sched_name), 
+            sched_data["total_evals"][mask],
+            sched_data["final_param_error"][mask],
+            label=labels.get(sched_name, sched_name),
             color=colors.get(sched_name, None)
         )
 
     ax.axhline(1e-8, color="black", linestyle="--", alpha=0.6, label=r"Target ($10^{-8}$)")
     ax.set_yscale("log")
     ax.set_xscale("log")
+    ax.set_title(titles[model_name])
     ax.set_xlabel("Total Gradient Evaluations")
-    ax.set_ylabel(r"$\max |\boldsymbol{\theta}_{\mathrm{final}} - \boldsymbol{\theta}_{\mathrm{CF}}|$")
+    if model_name == "ols":
+        ax.set_ylabel(r"$\max |\boldsymbol{\theta}_{\mathrm{final}} - \boldsymbol{\theta}_{\mathrm{CF}}|$")
+    if model_name == "lasso":
+        ax.set_ylabel(r"$\max |\boldsymbol{\theta}_{\mathrm{final}} - \boldsymbol{\theta}_{\mathrm{sklearn}}|$")
+        ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1), frameon=False)
     ax.grid(True, which="both", linestyle="--", alpha=0.4)
-    ax.legend(frameon=True, loc="lower left", fontsize=8)
 
-    # Consistent bounds for the schedule comparison plot
     ax.set_ylim(bottom=1e-9, top=10.0)
     ax.set_xlim(right=100000)
 
-    fig.subplots_adjust(left=0.28, right=0.92, bottom=0.18, top=0.92)
-    plt.savefig(f"figures/part_h_lr_schedule_adam_comparison_{model_name}.pdf", bbox_inches="tight", pad_inches=0.2)
+    plt.tight_layout()
+    plt.savefig(f"figures/part_h_lr_schedule_adam_comparison_{model_name}.pdf", bbox_inches="tight")
     plt.close() 
