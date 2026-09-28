@@ -740,33 +740,35 @@ chosen_lambda = 0.01  # for Ridge
 
 
 
-# # =====================================================================
-# # Exercise i) 
-# # Optimal lambda for Lasso 
-# # =====================================================================
+# =====================================================================
+# Exercise i)
+# Optimal lambda for Lasso
+# =====================================================================
 
-# data = readResultsFile("results/part=i_Lasso/n=100_noise=0.1_results.txt")
+data = readResultsFile("results/part=i_Lasso/n=100_noise=0.1_results.txt")
 
-# # k = 5
-# k_val = 5
-# mask = data["k"] == k_val
-# idx_min = np.argmin(data["MSE"][mask])
-# best_d = data["d"][mask][idx_min]
-# best_lambda = data["lambda"][mask][idx_min]
-# best_mse = data["MSE"][mask][idx_min]
-# print(f"Lasso k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best_mse:.5f}")
+# k = 5
+k_val = 5
+mask = data["k"] == k_val
+idx_min = np.argmin(data["MSE"][mask])
+best_d = data["d"][mask][idx_min]
+best_lambda = data["lambda"][mask][idx_min]
+best_mse = data["MSE"][mask][idx_min]
+print(f"Lasso k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best_mse:.5f}")
 
-# # k = 10
-# k_val = 10
-# mask = data["k"] == k_val
-# idx_min = np.argmin(data["MSE"][mask])
-# best_d = data["d"][mask][idx_min]
-# best_lambda = data["lambda"][mask][idx_min]
-# best_mse = data["MSE"][mask][idx_min]
-# print(f"Lasso k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best_mse:.5f}")
+# k = 10
+k_val = 10
+mask = data["k"] == k_val
+idx_min = np.argmin(data["MSE"][mask])
+best_d = data["d"][mask][idx_min]
+best_lambda = data["lambda"][mask][idx_min]
+best_mse = data["MSE"][mask][idx_min]
+print(f"Lasso k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best_mse:.5f}")
 
-# Lasso k=5: optimal d=9, lambda=1e-10, MSE=0.09494
-# Lasso k=10: optimal d=8, lambda=1e-10, MSE=0.09377
+# Updated Lasso results 
+# Lasso k=5: optimal d=13, lambda=1e-10, MSE=0.01404
+# Lasso k=10: optimal d=13, lambda=1e-10, MSE=0.01390
+
 
 # # -----------------------------------------------------------------------------------
 # # Part i)
