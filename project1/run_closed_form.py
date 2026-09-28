@@ -246,8 +246,8 @@ def CrossValidationLasso(num_points, noise, degrees, punishers):
                         StandardScaler(),
                         Lasso(
                             alpha=lamb / 2.0,
-                            fit_intercept=False,
-                            max_iter=10000,
+                            fit_intercept=True,
+                            max_iter=100000,
                             tol=1e-10
                         )
                     )
