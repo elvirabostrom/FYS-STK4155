@@ -7,6 +7,10 @@
 
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold, cross_val_score
+from sklearn.linear_model import Ridge, Lasso
+import warnings
+from sklearn.exceptions import ConvergenceWarning
 from utils import *
 
 
@@ -16,8 +20,13 @@ from utils import *
 
 seed = 2026
 
+import warnings
+from sklearn.exceptions import ConvergenceWarning
+
 def CrossValidationLasso(num_points, noise, degrees, punishers):
-# Lasso, compute and save MSE using k-fold cross-validation
+# Lasso, k-fold CV with warm starts along the lambda path (large -> small)
+    lambdas = np.sort(punishers)[::-1]
+
     for n in num_points:
         x, y = MakeData(n, noise, seed + n)
         x = x.reshape(-1, 1)
@@ -25,41 +34,41 @@ def CrossValidationLasso(num_points, noise, degrees, punishers):
         naming = {"n": n, "noise": noise, "exercise": "i_Lasso"}
         results = []
 
-        # Test 5-fold and 10-fold cross-validation
         for k in [5, 10]:
             kfold = KFold(n_splits=k, shuffle=True, random_state=1)
+            print(k)
 
             for d in degrees:
-                for lamb in punishers:
-                    # Lasso model
-                    model = make_pipeline(
-                        PolynomialFeatures(degree=d, include_bias=False),
-                        StandardScaler(),
-                        Lasso(
-                            alpha=lamb / 2.0,
-                            fit_intercept=True,
-                            max_iter=100000,
-                            tol=1e-10
-                        )
-                    )
+                print(d)
+                mse_folds = np.zeros((k, len(lambdas)))
+                converged = np.ones(len(lambdas), dtype=bool)
 
-                    # Cross-validation
-                    scores = -cross_val_score(
-                        model,
-                        x,
-                        y,
-                        cv=kfold,
-                        scoring="neg_mean_squared_error"
-                    )
+                for i, (tr, va) in enumerate(kfold.split(x)):
+                    # Scaling fitted on the training fold only
+                    poly = PolynomialFeatures(degree=d, include_bias=False)
+                    scaler = StandardScaler()
+                    X_tr = scaler.fit_transform(poly.fit_transform(x[tr]))
+                    X_va = scaler.transform(poly.transform(x[va]))
 
-                    mse = np.mean(scores)
+                    lasso = Lasso(fit_intercept=True, max_iter=100000,
+                                  tol=1e-6, warm_start=True)
 
-                    results.append({
-                        "k": k,
-                        "d": d,
-                        "lambda": lamb,
-                        "MSE": mse
-                    })
+                    for j, lamb in enumerate(lambdas):
+                        lasso.set_params(alpha = lamb / 2.0)
+                        with warnings.catch_warnings(record=True) as caught:
+                            warnings.simplefilter("always", ConvergenceWarning)
+                            lasso.fit(X_tr, y[tr])
+                        if any(issubclass(w.category, ConvergenceWarning) for w in caught):
+                            converged[j] = False
+                        mse_folds[i, j] = np.mean((lasso.predict(X_va) - y[va])**2)
+
+                        results.append({
+                            "k": k,
+                            "d": d,
+                            "lambda": lamb,
+                            "MSE": mse_folds[:, j].mean(),
+                            "converged": bool(converged[j])
+                        })
 
         writeToFile(naming, results)
 
@@ -68,9 +77,9 @@ num_points = np.array((100,))
 noise = 0.1
 degrees = np.arange(1, 16, 1)
 n_punishers = 100
-punishers = np.concatenate([[0], np.logspace(-12, -2, n_punishers)])
+punishers = np.logspace(-8, -1, n_punishers)
 
-CrossValidationLasso(num_points, noise, degrees, punishers)
+#CrossValidationLasso(num_points, noise, degrees, punishers)
 
 
 from sklearn.metrics import mean_squared_error

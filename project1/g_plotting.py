@@ -28,12 +28,12 @@ def readResultsFile(filename):
 res_g = Path("results") / "part=g"
 
 # Colours: same as method_styles above (parts e, f)
-c_plain    = "tab:blue"
-c_momentum = "tab:orange"
-c_adagrad  = "tab:green"
-c_rmsprop  = "tab:red"
-c_adam     = "tab:purple"
-c_soft     = "k"
+c_plain    = "gold"
+c_momentum = "black"
+c_adagrad  = "indianred"
+c_rmsprop  = "royalblue"
+c_adam     = "yellowgreen"
+c_soft     = "purple"
 
 # ---------------------------------------------------------------------
 # Figure 1: Lasso coefficients, subgradient vs soft thresholding
@@ -48,10 +48,10 @@ theta_adam  = np.abs(np.asarray(data_g["theta"][(meth_g == "adam")           & n
 theta_soft  = np.abs(np.asarray(data_g["theta"][(meth_g == "soft_threshold") & np.isclose(lam_g, chosen_lambda)][0], dtype=float))
 j = np.arange(1, len(theta_plain) + 1)
 
-plt.figure(figsize=(3.7, 2.8))
-plt.plot(j, theta_plain, marker = "o", color = c_plain, label = "Subgradient, plain GD")
-plt.plot(j, theta_adam,  marker = "s", color = c_adam,  label = "Subgradient, Adam")
-plt.plot(j, np.where(theta_soft > 0, theta_soft, np.nan), marker = "*", markersize = 9,
+plt.figure(figsize=(3.0, 2.8))
+plt.plot(j, theta_plain, color = c_plain, label = "Subgradient, plain GD")
+plt.plot(j, theta_adam, color = c_adam,  label = "Subgradient, Adam")
+plt.plot(j, np.where(theta_soft > 0, theta_soft, np.nan),
          linestyle = "--", color = c_soft, label = "Soft thresholding")   # exact zeros -> gaps
 plt.yscale("log")
 plt.ylim(1e-6, 2)
@@ -59,7 +59,7 @@ plt.xlabel(r"Coefficient index $j$ (power $x^j$)")
 plt.ylabel(r"$|\theta_j|$")
 plt.grid()
 plt.xlim(np.min(j), np.max(j))
-plt.legend(loc = "upper left", bbox_to_anchor = (1.02, 1), frameon = False)
+plt.legend(frameon = False)
 plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
 plt.savefig("figures/n=100_noise=0.1_exercise=g_coefficients_Lasso.pdf", bbox_inches='tight')
 #plt.show()
