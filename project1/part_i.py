@@ -8,7 +8,7 @@
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold, cross_val_score
-from sklearn.linear_model import Ridge, Lasso
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
 import warnings
 from sklearn.exceptions import ConvergenceWarning
 from utils import *
@@ -25,6 +25,7 @@ from sklearn.exceptions import ConvergenceWarning
 
 def CrossValidationLasso(num_points, noise, degrees, punishers):
 # Lasso, k-fold CV with warm starts along the lambda path (large -> small)
+# with the help of Claude (2026) to include the warm start
     lambdas = np.sort(punishers)[::-1]
 
     for n in num_points:
@@ -44,14 +45,12 @@ def CrossValidationLasso(num_points, noise, degrees, punishers):
                 converged = np.ones(len(lambdas), dtype=bool)
 
                 for i, (tr, va) in enumerate(kfold.split(x)):
-                    # Scaling fitted on the training fold only
                     poly = PolynomialFeatures(degree=d, include_bias=False)
                     scaler = StandardScaler()
                     X_tr = scaler.fit_transform(poly.fit_transform(x[tr]))
                     X_va = scaler.transform(poly.transform(x[va]))
 
-                    lasso = Lasso(fit_intercept=True, max_iter=100000,
-                                  tol=1e-6, warm_start=True)
+                    lasso = Lasso(fit_intercept=True, max_iter=100000, tol=1e-6, warm_start=True)
 
                     for j, lamb in enumerate(lambdas):
                         lasso.set_params(alpha = lamb / 2.0)
@@ -62,40 +61,49 @@ def CrossValidationLasso(num_points, noise, degrees, punishers):
                             converged[j] = False
                         mse_folds[i, j] = np.mean((lasso.predict(X_va) - y[va])**2)
 
-                        results.append({
-                            "k": k,
-                            "d": d,
-                            "lambda": lamb,
-                            "MSE": mse_folds[:, j].mean(),
-                            "converged": bool(converged[j])
-                        })
+                for j, lamb in enumerate(lambdas):
+                    results.append({
+                        "k": k,
+                        "d": d,
+                        "lambda": lamb,
+                        "MSE": mse_folds[:, j].mean(), 
+                        "MSE_std": mse_folds[:, j].std(ddof=1)
+                    })
 
         writeToFile(naming, results)
+        return results
 
-# Run cross-validation Lasso, run for k=5 and k=10
-num_points = np.array((100,))
-noise = 0.1
-degrees = np.arange(1, 16, 1)
-n_punishers = 100
-punishers = np.logspace(-8, -1, n_punishers)
+# # Run cross-validation Lasso, run for k=5 and k=10
+# num_points = np.array((100,))
+# noise = 0.1
+# degrees = np.arange(1, 16, 1)
+# n_punishers = 100
+# punishers = np.logspace(-10, -2, n_punishers)
 
-#CrossValidationLasso(num_points, noise, degrees, punishers)
+# results_cv = CrossValidationLasso(num_points, noise, degrees, punishers)
 
+# chosen_k = 10
+# candidates = [r for r in results_cv if r["k"] == chosen_k]
+# best = min(candidates, key=lambda r: r["MSE"])
+# d_Lasso, lamb_Lasso = int(best["d"]), best["lambda"]
+# print(f"Lasso optimum: d = {d_Lasso}, lambda = {lamb_Lasso:.3e}, CV-MSE = {best['MSE']:.5f}")
 
-from sklearn.metrics import mean_squared_error
-from sklearn.linear_model import LinearRegression, Ridge, Lasso
+# # Lasso optimum: d = 12, lambda = 5.337e-10, CV-MSE = 0.01302
 
 # -----------------------------------------------------------------------------------
 # Final test: OLS, Ridge and Lasso fitted once with optimal parameters from CV,
 # trained and tested on the same split of new, independent data
 # -----------------------------------------------------------------------------------
-# Written by Claude (Sept, 2026) w/ prompt to use optimal results from tables and complete
-# a last fit with new seed
 
-# Optimal parameters from cross-validation (n = 100, k = 5) - fill in from results
-d_OLS = 11                          # from Fig. 7b
-d_Ridge, lamb_Ridge = 12, 5.59e-8    # Tab. III
-d_Lasso, lamb_Lasso = ..., ...       # from Lasso CV results
+# Compute error with standard error
+def MSEwithSE(y_true, y_pred):
+    MSE = (y_true - y_pred)**2
+    return MSE.mean(), MSE.std(ddof=1) / np.sqrt(len(MSE))
+
+# Optimal parameters from cross-validation (n = 100, k = 10) filled in from results
+d_OLS = 10                        
+d_Ridge, lamb_Ridge = 12, 8.11e-8    
+d_Lasso, lamb_Lasso = 12, 5.337e-10  
 
 n = 100
 noise = 0.1
@@ -107,30 +115,32 @@ n_train = len(x_train)
 
 results = []
 
-# ---------------- OLS (closed form) ----------------
-model = make_pipeline(
+# OLS
+model_OLS = make_pipeline(
     PolynomialFeatures(d_OLS, include_bias=False),
     StandardScaler(),
     LinearRegression(fit_intercept=True)
 )
-model.fit(x_train.reshape(-1, 1), y_train)
-mse = mean_squared_error(y_test, model.predict(x_test.reshape(-1, 1)))
-results.append({"model": "OLS", "degree": d_OLS, "lambda": 0, "MSE": mse})
+model_OLS.fit(x_train.reshape(-1, 1), y_train)
+mse, mse_se = MSEwithSE(y_test, model_OLS.predict(x_test.reshape(-1, 1)))
+results.append({"model": "OLS", "degree": d_OLS, "lambda": 0, "MSE": mse, "SE": mse_se})
 
-# ---------------- Ridge (closed form) ----------------
-model = make_pipeline(
+# Ridge
+model_Ridge = make_pipeline(
     PolynomialFeatures(d_Ridge, include_bias=False),
     StandardScaler(),
     Ridge(alpha=n_train * lamb_Ridge)   # same scaling as in CV
 )
-model.fit(x_train.reshape(-1, 1), y_train)
-mse = mean_squared_error(y_test, model.predict(x_test.reshape(-1, 1)))
-results.append({"model": "Ridge", "degree": d_Ridge, "lambda": lamb_Ridge, "MSE": mse})
+model_Ridge.fit(x_train.reshape(-1, 1), y_train)
+mse, mse_se = MSEwithSE(y_test, model_Ridge.predict(x_test.reshape(-1, 1)))
+results.append({"model": "Ridge", "degree": d_Ridge, "lambda": lamb_Ridge, "MSE": mse, "SE": mse_se})
 
-# ---------------- Lasso (Adam) ----------------
+# Lasso (Adam) 
+# Written by Claude (Sept, 2026) w/ prompt to do the same for Lasso, as done for OLS and Ridge above
+# Parameters were then chosen by us
 target_tol = 1e-8
 max_iters_cap = 10000
-gamma = 0.55
+gamma = 0.05
 
 X_train = MakeDesignMatrix(x_train, d_Lasso)
 X_test = MakeDesignMatrix(x_test, d_Lasso)
@@ -156,19 +166,19 @@ if iters_needed >= max_iters_cap:
 
 theta_lasso = history[-1]
 y_pred = X_test_scaled @ theta_lasso + y_train.mean()
-mse = MSE(y_pred, y_test)
+mse, mse_se = MSEwithSE(y_pred, y_test)
 results.append({"model": "Lasso (Adam)", "degree": d_Lasso, "lambda": lamb_Lasso,
-                "iters_needed": iters_needed, "MSE": mse})
+                "iters_needed": iters_needed, "MSE": mse, "SE": mse_se})
 
 
-# ---------------- Sanity check and save data ----------------
+# Sanity check and save data
 model = make_pipeline(
     PolynomialFeatures(d_Lasso, include_bias=False),
     StandardScaler(),
     Lasso(alpha=lamb_Lasso / 2.0, fit_intercept=True, max_iter=100000, tol=1e-10)
 )
 model.fit(x_train.reshape(-1, 1), y_train)
-mse_sk = mean_squared_error(y_test, model.predict(x_test.reshape(-1, 1)))
+mse_sk, mse_se = MSEwithSE(y_test, model.predict(x_test.reshape(-1, 1)))
 print(f"Lasso test-MSE: Adam = {mse:.5f}, sklearn = {mse_sk:.5f}")
 
 naming = {"n": n, "noise": noise, "type": "final_test", "exercise": "i"}
@@ -204,4 +214,33 @@ datapoints = (
 )
 naming = {"n": n, "noise": noise, "type": "final_fit_data", "exercise": "final"}
 writeToFile(naming, datapoints)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

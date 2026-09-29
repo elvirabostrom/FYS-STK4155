@@ -336,11 +336,6 @@ plt.savefig("figures/n=500_noise=0.1_exercise=c_tradeoff_OLS.pdf", bbox_inches='
 #plt.show()
 
 
-# -----------------------------------
-# Comparison closed form no resampling
-# -----------------------------------
-
-
 
 
 # --------------------------------------
@@ -407,6 +402,15 @@ plt.savefig(
 )
 # plt.show()
 
+print("CROSS VAL OLS")
+k_val = 10
+mask = data_d["k"] == k_val
+idx_min = np.argmin(data_d["MSE"][mask])
+best_d = data_d["d"][mask][idx_min]
+best_mse = data_d["MSE"][mask][idx_min]
+best_std = data_d["MSE_std"][mask][idx_min]
+print(f"k={k_val}: optimal d={best_d}, MSE={best_mse:.5f}, MSE_std={best_std:.5f}")
+# k=10: optimal d=10, MSE=0.01330, MSE_std=0.00528
 
 # n = 500
 data_d = readResultsFile("results/part=d_OLS/n=500_noise=0.1_results.txt")
@@ -443,9 +447,12 @@ plt.savefig(
 )
 # plt.show()
 
+
 # -----------------------------------
-# Optimal lambda
+# Optimal lambda for Ridge
 # -----------------------------------
+
+print("CROSS VAL RIDGE")
 data = readResultsFile("results/part=d_Ridge/n=100_noise=0.1_results.txt")
 # k = 5
 k_val = 5
@@ -479,15 +486,16 @@ for n in [50, 100, 500]:
         best_d = data["d"][mask][idx_min]
         best_lambda = data["lambda"][mask][idx_min]
         best_mse = data["MSE"][mask][idx_min]
+        best_std = data["MSE_std"][mask][idx_min]
 
-        print(f"n={n}, k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best_mse:.5f}")
+        print(f"n={n}, k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best_mse:.5f}, MSE_std={best_std:.5f}")
 # Output
-# n=50, k=5: optimal d=12, lambda=5.59e-08, MSE=0.01320
-# n=50, k=10: optimal d=11, lambda=2.48e-07, MSE=0.01315
-# n=100, k=5: optimal d=12, lambda=5.59e-08, MSE=0.01294
-# n=100, k=10: optimal d=12, lambda=8.11e-08, MSE=0.01301
-# n=500, k=5: optimal d=14, lambda=0, MSE=0.01077
-# n=500, k=10: optimal d=14, lambda=0, MSE=0.01086
+#n=50, k=5: optimal d=12, lambda=5.59e-08, MSE=0.01320, MSE_std=0.00703
+#n=50, k=10: optimal d=11, lambda=2.48e-07, MSE=0.01315, MSE_std=0.01100
+#n=100, k=5: optimal d=12, lambda=5.59e-08, MSE=0.01294, MSE_std=0.00435
+#n=100, k=10: optimal d=12, lambda=8.11e-08, MSE=0.01301, MSE_std=0.00578
+#n=500, k=5: optimal d=14, lambda=0, MSE=0.01077, MSE_std=0.00094
+#n=500, k=10: optimal d=14, lambda=0, MSE=0.01086, MSE_std=0.00192
 
 
 # MSE as function of lambda for k = 5 and k = 10, n = 100 and d = 5
@@ -742,37 +750,14 @@ chosen_lambda = 0.01  # for Ridge
 
 # =====================================================================
 # Exercise i)
-# Optimal lambda for Lasso
+# Optimal lambda for Lasso found in part_i.py
 # =====================================================================
 
-data = readResultsFile("results/part=i_Lasso/n=100_noise=0.1_results.txt")
-# k = 5
-k_val = 5
-mask = data["k"] == k_val
-idx_min = np.argmin(data["MSE"][mask])
-best_d = data["d"][mask][idx_min]
-best_lambda = data["lambda"][mask][idx_min]
-best_mse = data["MSE"][mask][idx_min]
-print(f"Lasso k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best_mse:.5f}")
 
-# k = 10
-k_val = 10
-mask = data["k"] == k_val
-idx_min = np.argmin(data["MSE"][mask])
-best_d = data["d"][mask][idx_min]
-best_lambda = data["lambda"][mask][idx_min]
-best_mse = data["MSE"][mask][idx_min]
-print(f"Lasso k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best_mse:.5f}")
-
-# Lasso results 
-#Lasso k=5: optimal d=12, lambda=1e-08, MSE=0.00168
-#Lasso k=10: optimal d=12, lambda=1.92e-08, MSE=0.00048
-
-
-# # -----------------------------------------------------------------------------------
+# # ------------------------------------------------------------------------
 # # Part i)
 # # Compare MSE for OLS, Ridge and Lasso for different polynomial degrees
-# # -----------------------------------------------------------------------------------
+# # ------------------------------------------------------------------------
 
 # # Read results
 # data_ols = readResultsFile("results/part=d_OLS/n=100_noise=0.1_results.txt")
@@ -835,38 +820,22 @@ print(f"Lasso k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best
 
 # plt.close()
 
-# # -----------------------------------------------------------------------------------
-# # Part i)
-# # Plot data with optimal OLS, Ridge and Lasso models
-# # -----------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------
+# Part i)
+# Plot data with optimal OLS, Ridge and Lasso models
+# -----------------------------------------------------------------------------------
 
-# from sklearn.model_selection import train_test_split
-# from utils import *
+from sklearn.model_selection import train_test_split
+from utils import *
 
-# # Parameters
-# n = 100
-# noise = 0.1
-# seed = 2026
+# Load optimal parameters from cross-validation with k = 10
 
-# # Optimal parameters from cross-validation with k = 10
-# d_ols = 11
 
-# d_ridge = 12
-# lambda_ridge = 8.11e-8
+# Adam parameters for Lasso
+gamma = 0.55
+target_tol = 1e-8
+max_iters_cap = 10000
 
-# d_lasso = 8
-# lambda_lasso = 1e-10
-
-# # Adam parameters for Lasso
-# gamma = 0.55
-# target_tol = 1e-8
-# max_iters_cap = 10000
-
-# # Generate data
-# x, y = MakeData(n, noise, seed + n)
-
-# # Values used for plotting the fitted models
-# x_plot = np.linspace(np.min(x), np.max(x), 500)
 
 
 # # -------------------------------------------------------------
@@ -979,6 +948,54 @@ print(f"Lasso k={k_val}: optimal d={best_d}, lambda={best_lambda:.3g}, MSE={best
 # plt.close()
 
 
+# CV-MSE optimal
+data = readResultsFile("results/part=i_Lasso/n=100_noise=0.1_results.txt")
+mask = data["k"] == 10
+idx = np.argmin(data["MSE"][mask])
+print(f"Lasso k=10: d = {data['d'][mask][idx]}, lambda = {data['lambda'][mask][idx]:.3e}, "
+      f"CV-MSE = {data['MSE'][mask][idx]:.5f}, MSE_std = {data['MSE_std'][mask][idx]:.5f}")
+
+
+
+# Predictions
+fp = readResultsFile(
+    "results/part=final/n=100_noise=0.1_type=final_fit_predictions_results.txt"
+)
+dp = readResultsFile(
+    "results/part=final/n=100_noise=0.1_type=final_fit_data_results.txt"
+)
+train = dp["set"] == "train"
+test = dp["set"] == "test"
+
+plt.figure(figsize=(4.5, 2.6))
+plt.plot(fp["x"], fp["OLS"], label="OLS", color="b")
+plt.plot(fp["x"], fp["Ridge"], label="Ridge", color="r")
+plt.plot(fp["x"], fp["Lasso"], label="Lasso", color="yellowgreen")
+plt.scatter(dp["x"][train], dp["y"][train], s=8, color="grey", label="Train")
+plt.scatter(dp["x"][test], dp["y"][test], s=12, facecolors="none",edgecolors="black", label="Test")
+plt.xlabel(r"$x$")
+plt.ylabel(r"Prediction ($\hat{y}$)")
+plt.grid()
+plt.xticks(np.arange(-1, 1.01, 0.5))
+plt.yticks(np.arange(-0.21, 1.21, 0.2))  
+plt.xlim(np.min(fp["x"]), np.max(fp["x"]))
+plt.legend(
+    loc="upper left",
+    bbox_to_anchor=(1.02, 1),
+    frameon=False
+)
+plt.tight_layout()
+plt.savefig("figures/n=100_noise=0.1_exercise=i_final_fit.pdf", bbox_inches="tight")
+plt.close() 
+
+
+# final test MSE
+ft = readResultsFile("results/part=i/n=100_noise=0.1_type=final_test_results.txt")
+for i, name in enumerate(["OLS", "Ridge", "Lasso"]):
+    print(f"{name}: test MSE = {ft['MSE'][i]:.5f}, SE = {ft['SE'][i]:.5f}")
+#OLS: test MSE = 0.01409, SE = 0.00470
+#Ridge: test MSE = 0.01366, SE = 0.00458
+#Lasso: test MSE = 0.01698, SE = 0.00604
 
 
 

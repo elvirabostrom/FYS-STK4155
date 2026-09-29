@@ -140,7 +140,8 @@ def CrossValidationOLS(num_points, noise, degrees):
                 results.append({
                     "k": k,
                     "d": d,
-                    "MSE": mse
+                    "MSE": mse, 
+                    "MSE_std": np.std(scores, ddof=1)
                 })
 
         writeToFile(naming, results)
@@ -186,7 +187,8 @@ def CrossValidationRidge(num_points, noise, degrees, punishers):
                         "k": k,
                         "d": d,
                         "lambda": lamb,
-                        "MSE": mse
+                        "MSE": mse, 
+                        "MSE_std": np.std(scores, ddof=1)
                     })
 
         writeToFile(naming, results)
@@ -207,7 +209,7 @@ punishers = np.logspace(-6, 6, n_punishers)
 # Run Hastie fig. Remake
 degrees = np.arange(1, 20, 1)
 num_points = np.array((50, 100, 500))
-TrainTestErr(num_points, noise, degrees)
+#TrainTestErr(num_points, noise, degrees)
 
 # Run bootstrap resampling OLS
 degrees = np.arange(1, 16, 1)
