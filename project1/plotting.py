@@ -998,6 +998,63 @@ for i, name in enumerate(["OLS", "Ridge", "Lasso"]):
 #Lasso: test MSE = 0.01698, SE = 0.00604
 
 
+# CV-MSE comparison
+d = 12
+k = 10
+ 
+lasso = pd.read_csv("results/part=i_Lasso/n=100_noise=0.1_results.txt", sep="\t")
+ridge = pd.read_csv("results/part=d_Ridge/n=100_noise=0.1_results.txt", sep="\t")
+ols = pd.read_csv("results/part=d_OLS/n=100_noise=0.1_results.txt", sep="\t")
+ 
+# Select k = 10 and d = 12, and sort by lambda
+lasso = lasso[(lasso["k"] == k) & (lasso["d"] == d)].sort_values("lambda")
+ridge = ridge[(ridge["k"] == k) & (ridge["d"] == d)].sort_values("lambda")
+cv_ols = ols[(ols["k"] == k) & (ols["d"] == d)]["MSE"].iloc[0]
+
+ridge_pos = ridge[ridge["lambda"] > 0] # lambadd 0
+# CONVEGENCE CHECK
+print("Convergence check")
+has_conv = "converged" in lasso.columns # check conv for LAsso
+if has_conv:
+    conv = lasso["converged"].astype(str).str.strip().str.lower() == "true"
+print(f"OLS   d = {d}: CV-MSE = {cv_ols:.5f}")
+print(f"Ridge lambda = 0 (check, should equal OLS): {ridge[ridge['lambda'] == 0]['MSE'].iloc[0]:.5f}")
+i_l = lasso["MSE"].idxmin()
+i_r = ridge_pos["MSE"].idxmin()
+print(f"Lasso min: CV-MSE = {lasso.loc[i_l, 'MSE']:.5f} at lambda = {lasso.loc[i_l, 'lambda']:.3e}")
+print(f"Ridge min: CV-MSE = {ridge_pos.loc[i_r, 'MSE']:.5f} at lambda = {ridge_pos.loc[i_r, 'lambda']:.3e}")
+if has_conv:
+    print(f"Lasso not converged for {np.sum(~conv)} of {len(conv)} lambda values")
+    if np.any(~conv):
+        print(f"  largest non-converged lambda: {lasso['lambda'][~conv].max():.3e}")
+else:
+    print("No 'converged' column in the Lasso file")
+
+
+
+plt.figure(figsize=(5.7, 2.7))
+ 
+plt.axhline(cv_ols, color="blue", linestyle="--", label=f"OLS ($d={d}$)")
+plt.plot(ridge_pos["lambda"], ridge_pos["MSE"], color="red", label="Ridge")
+plt.plot(lasso["lambda"], lasso["MSE"], color="yellowgreen", label="Lasso")
+if has_conv and np.any(~conv):
+    plt.plot(lasso["lambda"].values[~conv], lasso["MSE"].values[~conv], "o", mfc="none",
+             color="k", markersize=1, label="Lasso, not converged")
+ 
+plt.xscale("log")
+plt.xlabel(r"Penalty ($\lambda$)")
+plt.ylabel("CV-MSE")
+#plt.title(f"$d = {d}$, $k = {k}$")
+plt.grid(True)
+plt.legend(
+    loc="upper left",
+    bbox_to_anchor=(1.02, 1),
+    frameon=False
+)
+plt.tight_layout()
+plt.savefig("figures/n=100_noise=0.1_exercise=i_CV_MSE_vs_lambda.pdf")
+#plt.show()
+
 
 
 

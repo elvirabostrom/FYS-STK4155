@@ -67,28 +67,29 @@ def CrossValidationLasso(num_points, noise, degrees, punishers):
                         "d": d,
                         "lambda": lamb,
                         "MSE": mse_folds[:, j].mean(), 
-                        "MSE_std": mse_folds[:, j].std(ddof=1)
+                        "MSE_std": mse_folds[:, j].std(ddof=1),
+                        "converged": bool(converged[j])
                     })
 
         writeToFile(naming, results)
         return results
 
-# # Run cross-validation Lasso, run for k=5 and k=10
-# num_points = np.array((100,))
-# noise = 0.1
-# degrees = np.arange(1, 16, 1)
-# n_punishers = 100
-# punishers = np.logspace(-10, -2, n_punishers)
+# Run cross-validation Lasso, run for k=5 and k=10
+num_points = np.array((100,))
+noise = 0.1
+degrees = np.arange(1, 16, 1)
+n_punishers = 100
+punishers = np.logspace(-10, -2, n_punishers)
 
-# results_cv = CrossValidationLasso(num_points, noise, degrees, punishers)
+results_cv = CrossValidationLasso(num_points, noise, degrees, punishers)
 
-# chosen_k = 10
-# candidates = [r for r in results_cv if r["k"] == chosen_k]
-# best = min(candidates, key=lambda r: r["MSE"])
-# d_Lasso, lamb_Lasso = int(best["d"]), best["lambda"]
-# print(f"Lasso optimum: d = {d_Lasso}, lambda = {lamb_Lasso:.3e}, CV-MSE = {best['MSE']:.5f}")
+chosen_k = 10
+candidates = [r for r in results_cv if r["k"] == chosen_k]
+best = min(candidates, key=lambda r: r["MSE"])
+d_Lasso, lamb_Lasso = int(best["d"]), best["lambda"]
+print(f"Lasso optimum: d = {d_Lasso}, lambda = {lamb_Lasso:.3e}, CV-MSE = {best['MSE']:.5f}")
 
-# # Lasso optimum: d = 12, lambda = 5.337e-10, CV-MSE = 0.01302
+# Lasso optimum: d = 12, lambda = 5.337e-10, CV-MSE = 0.01302
 
 # -----------------------------------------------------------------------------------
 # Final test: OLS, Ridge and Lasso fitted once with optimal parameters from CV,
@@ -103,7 +104,7 @@ def MSEwithSE(y_true, y_pred):
 # Optimal parameters from cross-validation (n = 100, k = 10) filled in from results
 d_OLS = 10                        
 d_Ridge, lamb_Ridge = 12, 8.11e-8    
-d_Lasso, lamb_Lasso = 12, 5.337e-10  
+d_Lasso, lamb_Lasso = 12, 6.428e-10
 
 n = 100
 noise = 0.1
@@ -135,43 +136,29 @@ model_Ridge.fit(x_train.reshape(-1, 1), y_train)
 mse, mse_se = MSEwithSE(y_test, model_Ridge.predict(x_test.reshape(-1, 1)))
 results.append({"model": "Ridge", "degree": d_Ridge, "lambda": lamb_Ridge, "MSE": mse, "SE": mse_se})
 
-# Lasso (Adam) 
+
+# Lasso (scikit-learn, same solver as in the cross-validation), fitted at the optimal lambda
 # Written by Claude (Sept, 2026) w/ prompt to do the same for Lasso, as done for OLS and Ridge above
-# Parameters were then chosen by us
-target_tol = 1e-8
-max_iters_cap = 10000
-gamma = 0.05
-
-X_train = MakeDesignMatrix(x_train, d_Lasso)
-X_test = MakeDesignMatrix(x_test, d_Lasso)
-X_train_scaled, X_test_scaled, y_train_centered = scaleData(X_train, X_test, y_train)
-
-theta_init = np.zeros(X_train_scaled.shape[1])
-
-def grad_d(theta):
-    return GradLassoAnalytic(theta, X_train_scaled, y_train_centered, lamb_Lasso)
-
-history = optimise(
-    grad=grad_d,
-    theta0=theta_init,
-    method="adam",
-    gamma=gamma,
-    num_iters=max_iters_cap,
-    tol=target_tol,
+model_Lasso = make_pipeline(
+    PolynomialFeatures(d_Lasso, include_bias=False),
+    StandardScaler(),
+    Lasso(alpha=lamb_Lasso / 2.0, fit_intercept=True, max_iter=100000, tol=1e-6)
 )
 
-iters_needed = len(history) - 1
-if iters_needed >= max_iters_cap:
-    print(f"WARNING: Adam did not converge within {max_iters_cap} iterations")
+with warnings.catch_warnings(record=True) as caught:
+    warnings.simplefilter("always", ConvergenceWarning)
+    model_Lasso.fit(x_train.reshape(-1, 1), y_train)
 
-theta_lasso = history[-1]
-y_pred = X_test_scaled @ theta_lasso + y_train.mean()
-mse, mse_se = MSEwithSE(y_pred, y_test)
-results.append({"model": "Lasso (Adam)", "degree": d_Lasso, "lambda": lamb_Lasso,
-                "iters_needed": iters_needed, "MSE": mse, "SE": mse_se})
+lasso_converged = not any(issubclass(w.category, ConvergenceWarning) for w in caught)
+if not lasso_converged:
+    print("WARNING: Lasso did not converge at the optimal lambda")
+
+mse, mse_se = MSEwithSE(y_test, model_Lasso.predict(x_test.reshape(-1, 1)))
+results.append({"model": "Lasso", "degree": d_Lasso, "lambda": lamb_Lasso,
+                "converged": lasso_converged, "MSE": mse, "SE": mse_se})
 
 
-# Sanity check and save data
+# check and save data
 model = make_pipeline(
     PolynomialFeatures(d_Lasso, include_bias=False),
     StandardScaler(),
@@ -179,7 +166,7 @@ model = make_pipeline(
 )
 model.fit(x_train.reshape(-1, 1), y_train)
 mse_sk, mse_se = MSEwithSE(y_test, model.predict(x_test.reshape(-1, 1)))
-print(f"Lasso test-MSE: Adam = {mse:.5f}, sklearn = {mse_sk:.5f}")
+print(f"Lasso test-MSE: sklearn = {mse_sk:.5f}")
 
 naming = {"n": n, "noise": noise, "type": "final_test", "exercise": "i"}
 writeToFile(naming, results)
@@ -189,20 +176,15 @@ writeToFile(naming, results)
 # Save predictions for final fit
 # -----------------------------------------------------------------------------------
 
-x_plot = np.linspace(x_new.min(), x_new.max(), 200)
+x_plot = np.linspace(x_new.min(), x_new.max(), 200).reshape(-1, 1)
 
-# OLS and Ridge
-pred_OLS = model_OLS.predict(x_plot.reshape(-1, 1))
-pred_Ridge = model_Ridge.predict(x_plot.reshape(-1, 1))
-
-# Lasso (Adam), scale grid with the TRAINING mean/std, same as the test set
-X_plot = MakeDesignMatrix(x_plot, d_Lasso)
-_, X_plot_scaled, _ = scaleData(X_train, X_plot, y_train)
-pred_Lasso = X_plot_scaled @ theta_lasso + y_train.mean()
+pred_OLS = model_OLS.predict(x_plot)
+pred_Ridge = model_Ridge.predict(x_plot)
+pred_Lasso = model_Lasso.predict(x_plot)
 
 predictions = [
     {"x": xi, "OLS": p1, "Ridge": p2, "Lasso": p3}
-    for xi, p1, p2, p3 in zip(x_plot, pred_OLS, pred_Ridge, pred_Lasso)
+    for xi, p1, p2, p3 in zip(x_plot.ravel(), pred_OLS, pred_Ridge, pred_Lasso)
 ]
 naming = {"n": n, "noise": noise, "type": "final_fit_predictions", "exercise": "final"}
 writeToFile(naming, predictions)
