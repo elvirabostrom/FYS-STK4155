@@ -113,11 +113,11 @@ mse_lasso_exact = data_gd["MSE"][(model_g == "Lasso") & (meth_gd == "exact")]
 mse_lasso_adam  = data_gd["MSE"][(model_g == "Lasso") & (meth_gd == "adam")]
 
 plt.figure(figsize=(3.7, 2.8))
-plt.plot(d_ols,   mse_ols_exact,   color = "b",             label = "OLS (exact)")
+plt.plot(d_ols,   mse_ols_exact,   color = "b",             label = "OLS (closed form)")
 plt.plot(d_ols,   mse_ols_adam,    color = "b",             linestyle = "--", marker = "*", markersize = 4, label = "OLS (Adam)")
-plt.plot(d_ridge, mse_ridge_exact, color = "palevioletred", label = "Ridge (exact)")
+plt.plot(d_ridge, mse_ridge_exact, color = "palevioletred", label = "Ridge (closed form)")
 plt.plot(d_ridge, mse_ridge_adam,  color = "palevioletred", linestyle = "--", marker = "*", markersize = 4, label = "Ridge (Adam)")
-plt.plot(d_lasso, mse_lasso_exact, color = "k",             label = "Lasso (exact)")
+plt.plot(d_lasso, mse_lasso_exact, color = "k",             label = "Lasso (scikit-learn)")
 plt.plot(d_lasso, mse_lasso_adam,  color = "k",             linestyle = "--", marker = "*", markersize = 4, label = "Lasso (Adam)")
 plt.yscale("log")
 plt.xlabel(r"Polynomial degree $(d)$")
@@ -256,8 +256,8 @@ nonzero      = data_m["nonzero_lasso"]
 
 # (a) test MSE versus lambda
 plt.figure(figsize=(3.4, 2.6))
-plt.plot(lam_m, mse_ridge, color = "palevioletred", label = "Ridge (exact)")
-plt.plot(lam_m, mse_lasso, color = "k",             label = "Lasso (exact)")
+plt.plot(lam_m, mse_ridge, color = "palevioletred", label = "Ridge (closed form)")
+plt.plot(lam_m, mse_lasso, color = "k",             label = "Lasso (scikit-learn)")
 plt.plot(lam_m, mse_lassoAdm, color = "k", linestyle = "none", marker = "*", markersize = 5,
          label = "Lasso (Adam)")
 plt.axhline(mse_ols, color = "b",    linestyle = "--", linewidth = 1, label = "OLS")
@@ -268,7 +268,7 @@ plt.xlabel(r"Penalty $(\lambda)$")
 plt.ylabel("Test MSE")
 plt.grid()
 plt.xlim(np.min(lam_m), np.max(lam_m))
-plt.legend(frameon = False, fontsize = 7)
+plt.legend(loc="upper left",bbox_to_anchor=(1.02, 1),frameon = False, fontsize = 9)
 plt.savefig("figures/n=100_noise=0.1_exercise=g_MSE_vs_lambda_d10.pdf", bbox_inches='tight')
 plt.close()
 
