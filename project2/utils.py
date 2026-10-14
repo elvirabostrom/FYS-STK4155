@@ -5,8 +5,8 @@ from sklearn.metrics import accuracy_score
 import numpy as np
 
 """
-Activation functions, cost functions and their derivatives, and other functions used over 
-multiple parts of our analysis, in both regression and classification.
+Activation functions, cost functions and their derivatives, gradient descent
+and other functions used over multiple parts of our analysis.
 """
 
 
@@ -102,7 +102,7 @@ Gradient descent methods
 
 def SGD(network, in_train, target_train, in_test, target_test, method="plain", gamma=0.01, M=30, epochs=50, beta=0.9, rho=0.99, beta1=0.9, beta2=0.999, eps=1e-8, seed=2026):
     # Written with the help of Claude Opus 5.5 (October 2026)
-    # w/ prompt "can you adapt this function (currently only momentum) to also include plain GD, RMSProp and Adam based on this code, but make it cleaner: *pasted code from project 1*"
+    # w/ prompt "can you adapt this function (currently only momentum) to also include plain GD, RMSProp and Adam based on this code: *pasted code from project 1*"
 
     """
     method: "plain", "momentum", "rmsprop" or "adam"
