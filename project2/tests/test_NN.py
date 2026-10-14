@@ -4,6 +4,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import numpy as np
 import jax
 from sklearn import datasets
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from utils import *
 from neural_network import *
 
@@ -29,9 +31,9 @@ for i, t in enumerate(iris.target):
 
 # structure
 network_input_size = inputs.shape[1]
-activation_funcs = [ReLU, sigmoid, sigmoid, softmax]
-activation_ders = [ReLU_der, sigmoid_der, sigmoid_der, None]
-layer_output_sizes = [8, 10, 4, 3]
+activation_funcs = [ReLU, sigmoid, softmax]
+activation_ders = [ReLU_der, sigmoid_der, None]
+layer_output_sizes = [8, 4, 3]
 cost_func = crossEntropy
 
 # make network object
@@ -62,3 +64,34 @@ print([ (np.allclose(dW, dW_j), np.allclose(db, db_j))
 
 # HELL YEAH I COOKED
 
+
+# SGD test with momentum
+
+# split
+in_train, in_test, target_train, target_test = train_test_split(inputs, targets, test_size=0.2, random_state=123)
+
+# scale
+scaler = StandardScaler().fit(in_train)
+in_train = scaler.transform(in_train)
+in_test  = scaler.transform(in_test)
+
+# re-initialize
+irisNetwork = NN(network_input_size, layer_output_sizes, activation_funcs, activation_ders, cost_func, costDer = None)
+
+# pre-print
+print(f"before training: train accuracy {accuracy(irisNetwork.feedForward(in_train), target_train):.3f}")
+
+# set params
+gamma = 0.1 # learning rate, how big is the step along the gradient
+beta = 0.9 # momentum, how much to keep from last step
+M = 32 # minibatch-size, number of samples per gradient calculation
+epochs = 50 # how many times to go through the whole training set
+
+# SGD momentum
+cost, train_acc, test_acc = SGD(irisNetwork, in_train, target_train, in_test, target_test, "momentum", gamma, M, epochs, beta)
+
+for epoch in [9, 19, 29, 39, 49]:
+    print("epoch: ", epoch + 1, " cost: ", cost[epoch], "train acc: ", train_acc[epoch], "test acc: ", test_acc[epoch])
+
+
+# double cook
