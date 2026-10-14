@@ -4,14 +4,22 @@ jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp               
 from utils import *
 
+"""
+Class NN
+
+Feed forward neural network (FFNN) object, a fully contracted network. 
+"""
+
 
 class NN:
-	def __init__(self, inputSize, layerOutputSizes, activationFuncs, costFunc, norm = None, lam = 0.0, seed = 123):
-		# Initialize fully connected neural network
+	def __init__(self, inputSize, layerOutputSizes, activationFuncs, activationDers, costFunc, costDer, norm = None, lam = 0.0, seed = 2026):
+		# Initialize NN object
 		self.inputSize = inputSize # num of features
 		self.layerOutputSizes = layerOutputSizes # num of nodes in each layer
 		self.activationFuncs = activationFuncs # activation functions used in each layer
-		self.costFunc = costFunc # cost function (Regression og classification)
+		self.activationDers = activationDers # derivatives of activation functions
+		self.costFunc = costFunc # cost function
+		self.costDer = costDer # derivative of cost function
 		self.norm = norm # norm (Ridge or Lasso)
 		self.penalty = lam # penalty in Ridge or Lasso
 
@@ -28,9 +36,11 @@ class NN:
 			self.layers.append((W, b))
 			iSize = outputSize
 
+
 	def getStructure(self):
 		# print the structure of the NN
 		print("Structure: ", self.inputSize, [W.shape for W, b in self.layers])
+
 
 	def feedForward(self, input, layers = None):
 		# perform feed forward on the NN
@@ -42,10 +52,30 @@ class NN:
 			a = activationFunc(z)
 		return a
 
+
+	def feedForwardSaver(self, input):
+		# save inputs (except first layer), z and a from every layer
+		layerInputs = []
+		zs = []
+		a = input
+		for (W, b), activationFunc in zip(self.layers, self.activationFuncs):
+			layerInputs.append(a)
+			z = a @ W + b
+			a = activationFunc(z)
+			zs.append(z)
+		return layerInputs, zs, a
+
+
+	def penalty(self):
+		# NEEDS TO BE ADDED
+		pass
+
+
 	def cost(self, input, layers, targets):
 		# compute cost after feed forward
 		predict = self.feedForward(input, layers)
 		return self.costFunc(predict, targets) # + self.penalty(layers) senere!
+
 
 	def getGradientJAX(self, inputs, targets):
 		# compute gradient from cost
@@ -54,11 +84,47 @@ class NN:
 		return layersGrad
 
 
+	def backpropReg(self, input, target):
+		# back propagation suited for regression problem
+		layerInputs, zs, predict = self.feedForwardSaver(input)
+		layerGrads = [() for layer in self.layers]
+		for i in reversed(range(len(self.layers))):
+			layerInput, z, activationDer = layerInputs[i], zs[i], self.activationDers[i]
+			if i == len(self.layers) - 1:
+				dC_da = self.costDer(predict, target) # last layer
+			else:
+				(W, b) = self.layers[i + 1] # other layers
+				dC_da = dC_dz @ W.T
+			dC_dz = dC_da * activationDer(z)
+			dC_dW = layerInput.T @ dC_dz
+			dC_db = np.sum(dC_dz, axis = 0)
+
+			layerGrads[i] = (dC_dW, dC_db)
+		return layerGrads
 
 
+	def backpropClass(self, input, target):
+		# back propagation suited for classification - with softmax and cross entropy
+		layerInputs, zs, predict = self.feedForwardSaver(input)
+		layerGrads = [() for layer in self.layers]
+		for i in reversed(range(len(self.layers))):
+			layerInput, z, activationDer = layerInputs[i], zs[i], self.activationDers[i]
+			if i == len(self.layers) - 1:
+				dC_dz = (predict - target) / input.shape[0] # last layer
+			else:
+				(W, b) = self.layers[i + 1] # other layers
+				dC_da = dC_dz @ W.T
+				dC_dz = dC_da * activationDer(z)
+			dC_dW = layerInput.T @ dC_dz
+			dC_db = np.sum(dC_dz, axis = 0)
+
+			layerGrads[i] = (dC_dW, dC_db)
+		return layerGrads
 
 
-
+	def updateWeights(self, layerSteps):
+		# use computed step update (from GD method) to update W and b in the network
+		self.layers = [(W - stepW, b - stepb) for (W, b), (stepW, stepb) in zip(self.layers, layerSteps)]
 
 
 
