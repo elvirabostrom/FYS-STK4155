@@ -20,8 +20,8 @@ class NN:
 		self.activationDers = activationDers # derivatives of activation functions
 		self.costFunc = costFunc # cost function
 		self.costDer = costDer # derivative of cost function
-		self.norm = norm # norm (Ridge or Lasso)
-		self.penalty = lam # penalty in Ridge or Lasso
+		self.norm = norm # norm ("l1" or "l2" or None)
+		self.lam = lam # penalty in Ridge or Lasso // changed self.penalty to self.lam as we already have a function called penalty
 
 		self.layers = [] # make hidden layers and output layer
 		iSize = inputSize
@@ -66,15 +66,26 @@ class NN:
 		return layerInputs, zs, a
 
 
-	def penalty(self):
-		# NEEDS TO BE ADDED
-		pass
+	def penalty(self, layers):
+    	# Compute L1 or L2 regularization penalty over weights (biases are excluded)
+    	if self.norm is None or self.lam == 0.0:
+        	return 0.0
+    
+    	reg = 0.0
+    
+    	for W, b in layers:
+        	if self.norm == "l2":
+            	reg += self.lam * jnp.sum(W ** 2)
+        	elif self.norm == "l1":
+            	reg += self.lam * jnp.sum(jnp.abs(W))
+            
+    	return reg
 
 
 	def cost(self, input, layers, targets):
 		# compute cost after feed forward
 		predict = self.feedForward(input, layers)
-		return self.costFunc(predict, targets) # + self.penalty(layers) senere!
+		return self.costFunc(predict, targets) + self.penalty(layers)
 
 
 	def getGradientJAX(self, inputs, targets):
@@ -90,15 +101,25 @@ class NN:
 		layerGrads = [() for layer in self.layers]
 		for i in reversed(range(len(self.layers))):
 			layerInput, z, activationDer = layerInputs[i], zs[i], self.activationDers[i]
+			
+			W, b = self.layers[i]
+
 			if i == len(self.layers) - 1:
 				dC_da = self.costDer(predict, target) # last layer
 			else:
-				(W, b) = self.layers[i + 1] # other layers
-				dC_da = dC_dz @ W.T
+				#(W, b) = self.layers[i + 1] # other layers
+				#dC_da = dC_dz @ W.T
+				(W_next, b_next) = self.layers[i + 1] 
+        		dC_da = dC_dz @ W_next.T
+			
 			dC_dz = dC_da * activationDer(z)
-			dC_dW = layerInput.T @ dC_dz
 			dC_db = np.sum(dC_dz, axis = 0)
-
+			dC_dW = layerInput.T @ dC_dz
+			if self.norm is not None and self.lam > 0.0:
+    			if self.norm == "l2":
+        			dC_dW += 2.0 * self.lam * W
+    			elif self.norm == "l1":
+        			dC_dW += self.lam * np.sign(W)
 			layerGrads[i] = (dC_dW, dC_db)
 		return layerGrads
 
@@ -109,15 +130,25 @@ class NN:
 		layerGrads = [() for layer in self.layers]
 		for i in reversed(range(len(self.layers))):
 			layerInput, z, activationDer = layerInputs[i], zs[i], self.activationDers[i]
+			
+			W, b = self.layers[i]
+
 			if i == len(self.layers) - 1:
 				dC_dz = (predict - target) / input.shape[0] # last layer
 			else:
-				(W, b) = self.layers[i + 1] # other layers
-				dC_da = dC_dz @ W.T
+				#(W, b) = self.layers[i + 1] # other layers
+				#dC_da = dC_dz @ W.T
+				(W_next, b_next) = self.layers[i + 1] 
+        		dC_da = dC_dz @ W_next.T
 				dC_dz = dC_da * activationDer(z)
-			dC_dW = layerInput.T @ dC_dz
+			
 			dC_db = np.sum(dC_dz, axis = 0)
-
+			dC_dW = layerInput.T @ dC_dz
+			if self.norm is not None and self.lam > 0.0:
+    			if self.norm == "l2":
+        			dC_dW += 2.0 * self.lam * W
+    			elif self.norm == "l1":
+        			dC_dW += self.lam * np.sign(W)
 			layerGrads[i] = (dC_dW, dC_db)
 		return layerGrads
 
