@@ -37,7 +37,7 @@ layer_output_sizes = [8, 4, 3]
 cost_func = crossEntropy
 
 # make network object
-irisNetwork = NN(network_input_size, layer_output_sizes, activation_funcs, activation_ders, cost_func, costDer = None)
+irisNetwork = NN(network_input_size, layer_output_sizes, activation_funcs, activation_ders, cost_func, costDer = None, norm = "l2", lam = 0.01)
 
 # print shape of network
 irisNetwork.getStructure()
@@ -76,7 +76,7 @@ in_train = scaler.transform(in_train)
 in_test  = scaler.transform(in_test)
 
 # re-initialize
-irisNetwork = NN(network_input_size, layer_output_sizes, activation_funcs, activation_ders, cost_func, costDer = None)
+irisNetwork = NN(network_input_size, layer_output_sizes, activation_funcs, activation_ders, cost_func, costDer = None, norm = "l2", lam = 0.01)
 
 # pre-print
 print(f"before training: train accuracy {accuracy(irisNetwork.feedForward(in_train), target_train):.3f}")
@@ -87,11 +87,11 @@ beta = 0.9 # momentum, how much to keep from last step
 M = 32 # minibatch-size, number of samples per gradient calculation
 epochs = 50 # how many times to go through the whole training set
 
-# SGD momentum
-cost, train_acc, test_acc = SGD(irisNetwork, in_train, target_train, in_test, target_test, "momentum", gamma, M, epochs, beta)
+# train
+minimizeCost, trainCost, trainAcc, num_epochs = train(irisNetwork, in_train, target_train, classification=True, method="none", gamma=0.1, M=30, epochs=50, rho=0.99, beta1=0.9, beta2=0.999, eps=1e-8, tol=1e-6, seed=2026)
 
 for epoch in [9, 19, 29, 39, 49]:
-    print("epoch: ", epoch + 1, " cost: ", cost[epoch], "train acc: ", train_acc[epoch], "test acc: ", test_acc[epoch])
+    print("epoch: ", epoch + 1, " cost: ", minimizeCost[epoch], "train acc: ", trainAcc[epoch], "train cost: ", trainCost[epoch])
 
 
 # double cook

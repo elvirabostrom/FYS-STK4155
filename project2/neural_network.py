@@ -67,25 +67,30 @@ class NN:
 
 
 	def penalty(self, layers):
-    	# Compute L1 or L2 regularization penalty over weights (biases are excluded)
-    	if self.norm is None or self.lam == 0.0:
-        	return 0.0
-    
-    	reg = 0.0
-    
-    	for W, b in layers:
-        	if self.norm == "l2":
-            	reg += self.lam * jnp.sum(W ** 2)
-        	elif self.norm == "l1":
-            	reg += self.lam * jnp.sum(jnp.abs(W))
-            
-    	return reg
+	    # Compute L1 or L2 regularization penalty over weights (biases are excluded)
+	    if self.norm is None or self.lam == 0.0:
+	        return 0.0
+
+	    reg = 0.0
+
+	    for W, b in layers:
+	        if self.norm == "l2":
+	            reg += self.lam * jnp.sum(W ** 2)
+	        elif self.norm == "l1":
+	            reg += self.lam * jnp.sum(jnp.abs(W))
+
+	    return reg
 
 
 	def cost(self, input, layers, targets):
 		# compute cost after feed forward
 		predict = self.feedForward(input, layers)
 		return self.costFunc(predict, targets) + self.penalty(layers)
+
+
+	def evaluate(self, inputs, targets):
+	    # cost without penalty, for reporting
+	    return self.costFunc(self.feedForward(inputs), targets)
 
 
 	def getGradientJAX(self, inputs, targets):
@@ -110,16 +115,16 @@ class NN:
 				#(W, b) = self.layers[i + 1] # other layers
 				#dC_da = dC_dz @ W.T
 				(W_next, b_next) = self.layers[i + 1] 
-        		dC_da = dC_dz @ W_next.T
+				dC_da = dC_dz @ W_next.T
 			
 			dC_dz = dC_da * activationDer(z)
 			dC_db = np.sum(dC_dz, axis = 0)
 			dC_dW = layerInput.T @ dC_dz
 			if self.norm is not None and self.lam > 0.0:
-    			if self.norm == "l2":
-        			dC_dW += 2.0 * self.lam * W
-    			elif self.norm == "l1":
-        			dC_dW += self.lam * np.sign(W)
+				if self.norm == "l2":
+					dC_dW += 2.0 * self.lam * W
+				elif self.norm == "l1":
+					dC_dW += self.lam * np.sign(W)
 			layerGrads[i] = (dC_dW, dC_db)
 		return layerGrads
 
@@ -138,17 +143,17 @@ class NN:
 			else:
 				#(W, b) = self.layers[i + 1] # other layers
 				#dC_da = dC_dz @ W.T
-				(W_next, b_next) = self.layers[i + 1] 
-        		dC_da = dC_dz @ W_next.T
+				(W_next, b_next) = self.layers[i + 1]
+				dC_da = dC_dz @ W_next.T
 				dC_dz = dC_da * activationDer(z)
 			
 			dC_db = np.sum(dC_dz, axis = 0)
 			dC_dW = layerInput.T @ dC_dz
 			if self.norm is not None and self.lam > 0.0:
-    			if self.norm == "l2":
-        			dC_dW += 2.0 * self.lam * W
-    			elif self.norm == "l1":
-        			dC_dW += self.lam * np.sign(W)
+				if self.norm == "l2":
+					dC_dW += 2.0 * self.lam * W
+				elif self.norm == "l1":
+					dC_dW += self.lam * np.sign(W)
 			layerGrads[i] = (dC_dW, dC_db)
 		return layerGrads
 

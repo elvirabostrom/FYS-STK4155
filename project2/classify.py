@@ -1,6 +1,15 @@
 """
 Classifying digits with a FFNN
+
+the softmax
+The cross entropy is the cost function
 """
+
+# scaling , train-test splitting via scikit-learn
+# MNIST: kommer med eget testsett, bruk dette kun til siste evaluering
+
+
+
 
 # GENERAL
 # download MNIST dataset, but test with small version from scikit first
