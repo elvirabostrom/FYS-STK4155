@@ -88,10 +88,17 @@ M = 32 # minibatch-size, number of samples per gradient calculation
 epochs = 50 # how many times to go through the whole training set
 
 # train
-minimizeCost, trainCost, trainAcc, num_epochs = train(irisNetwork, in_train, target_train, classification=True, method="none", gamma=0.1, M=30, epochs=50, rho=0.99, beta1=0.9, beta2=0.999, eps=1e-8, tol=1e-6, seed=2026)
+history, num_epochs, layers = train(irisNetwork, in_train, target_train, classification=True, method="none", gamma=0.1, M=30, epochs=50, rho=0.99, beta1=0.9, beta2=0.999, eps=1e-8, tol=1e-6, seed=2026)
+minimizeCost, trainCost, trainAcc = history["minimizeCost"], history["trainCost"], history["trainAcc"]
 
 for epoch in [9, 19, 29, 39, 49]:
     print("epoch: ", epoch + 1, " cost: ", minimizeCost[epoch], "train acc: ", trainAcc[epoch], "train cost: ", trainCost[epoch])
 
 
 # double cook
+
+
+
+# TEST CROSS VAL WRAPPERS
+
+
