@@ -11,7 +11,7 @@ ACT = {
 }
 
 
-class Regressor(BaseEstimator, RegressorMixin):
+class Regressor(RegressorMixin, BaseEstimator):
     def __init__(self, hidden=(50,), activation="sigmoid", gamma=0.03, lmbd=0.0, norm = "l2", method = "none", epochs=1000, batch_size=10, tol = None, seed=2026):
         self.hidden = hidden
         self.activation = activation
@@ -45,7 +45,7 @@ class Regressor(BaseEstimator, RegressorMixin):
         return np.asarray(self.network_.feedForward(np.asarray(X, dtype=float))).ravel()
 
 
-class Classifier(BaseEstimator, ClassifierMixin):
+class Classifier(ClassifierMixin, BaseEstimator):
     def __init__(self, hidden=(50,), activation="sigmoid", gamma=0.03, lmbd=0.0, norm = "l2", method = "none", epochs=1000, batch_size=10, tol = None, seed=2026):
         self.hidden = hidden
         self.activation = activation
