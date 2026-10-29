@@ -62,8 +62,6 @@ print("Same values?")
 print([ (np.allclose(dW, dW_j), np.allclose(db, db_j))
         for (dW, db), (dW_j, db_j) in zip(layer_grads, layer_grads_jax) ])
 
-# HELL YEAH I COOKED
-
 
 # SGD test with momentum
 
@@ -93,12 +91,5 @@ minimizeCost, trainCost, trainAcc = history["minimizeCost"], history["trainCost"
 
 for epoch in [9, 19, 29, 39, 49]:
     print("epoch: ", epoch + 1, " cost: ", minimizeCost[epoch], "train acc: ", trainAcc[epoch], "train cost: ", trainCost[epoch])
-
-
-# double cook
-
-
-
-# TEST CROSS VAL WRAPPERS
 
 
