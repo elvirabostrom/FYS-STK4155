@@ -37,8 +37,8 @@ Activation function derivatives
 def ReLU_der(z):
     return jnp.where(z > 0, 1.0, 0.0)
 
-def leakyReLU_der(z):
-    return (z > 0).astype(float)
+def leakyReLU_der(z, alpha=0.01):
+    return jnp.where(z > 0, 1.0, alpha)
 
 def sigmoid_der(z):
     s = sigmoid(z)
