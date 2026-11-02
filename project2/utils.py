@@ -92,9 +92,9 @@ def train(network, in_train, target_train, classification=True, method="none", g
 
     """
     classification: decides the calculation of the network gradients (classification means softmax and cross entropy)
-    method: "none", "rmsprop" or "adam"
+    method: "gd", "rmsprop" or "adam"
     gamma:  learningrate
-    M:      minibatch size for SGD, None gives plain gradient descent
+    M:      minibatch size for SGD, "gd" gives plain gradient descent
     epochs: if M is None this corresponds to the number of iterations
     rho:    RMSprop, forgetting factor
     beta1, beta2: Adam, forgetting facot for 1. and 2. moment
@@ -121,7 +121,7 @@ def train(network, in_train, target_train, classification=True, method="none", g
 
             t += 1
 
-            if method == "none":
+            if method == "gd":
                 steps = [(gamma * dW, gamma * db) for dW, db in grads]
 
             elif method == "rmsprop":
@@ -150,7 +150,6 @@ def train(network, in_train, target_train, classification=True, method="none", g
     history = {"minimizeCost": minimizeCost, "trainCost": trainCost, "trainAcc": trainAcc}
 
     return history, num_epochs, network.layers
-
 
 
 
