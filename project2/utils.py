@@ -94,7 +94,7 @@ def train(network, in_train, target_train, classification=True, method="none", g
     classification: decides the calculation of the network gradients (classification means softmax and cross entropy)
     method: "gd", "rmsprop" or "adam"
     gamma:  learningrate
-    M:      minibatch size for SGD, "gd" gives plain gradient descent
+    M:      minibatch size for SGD, M=None and "gd" gives plain gradient descent
     epochs: if M is None this corresponds to the number of iterations
     rho:    RMSprop, forgetting factor
     beta1, beta2: Adam, forgetting facot for 1. and 2. moment
