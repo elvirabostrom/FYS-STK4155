@@ -6,8 +6,8 @@ import jax
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from utils import *
-from neural_network import *
+from src.utils import *
+from src.neural_network import *
 
 # TEST ON IRIS SET
 print("IRIS TEST")

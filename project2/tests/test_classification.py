@@ -1,15 +1,15 @@
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import numpy as np  
+import numpy as np
 from sklearn import datasets
 import pandas as pd
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import StratifiedKFold, GridSearchCV, cross_validate, train_test_split, validation_curve
-from utils import *
-from estimator import *
-from neural_network import NN 
+from src.utils import *
+from src.estimator import *
+from src.neural_network import NN
 
 """
 TESTING CLASSIFICATION ON THE SCIKIT DIGITS SET

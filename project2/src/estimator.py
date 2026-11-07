@@ -1,7 +1,7 @@
 import numpy as np 
 from sklearn.base import BaseEstimator, RegressorMixin, ClassifierMixin
-from neural_network import NN
-from utils import * 
+from .neural_network import NN
+from .utils import * 
 
 
 ACT = {
