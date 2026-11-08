@@ -3,14 +3,17 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn import metrics as skm
-from utils import *
-from estimator import *
-from neural_network import NN 
+from src.utils import *
+from src.estimator import *
+from src.neural_network import NN
+import time
 
 """
-Model selection of the FFNN for classifying digits
+Model selection of the FFNN for classifying digits, selecting the final results and plotting/printing them
 
+From cv_digits.py:
 Cross-validation has been done over learning rates and penalties
+A validation curve has been found over the width
 """
 
 def one_se(df):
@@ -42,10 +45,11 @@ X_test = x_test.reshape(len(x_test), -1) / 255.0 # (10000, 784)
 X_train = x_train.reshape(len(x_train), -1) / 255.0 # (60000, 784)
 
 
-# load data frame - grid from cross validation
+# load data frame from cross validation
 GRID = pd.read_csv("results/gridsearch_MNIST.csv")
 GRID_LOG = pd.read_csv("results/gridsearch_MNIST_logistic.csv")
 
+# grid used
 penalties = [1e-6, 1e-5, 1e-4, 1e-3, 0.01]
 gammas  = [1e-4, 1e-3, 3e-3, 0.01, 0.03]
 
@@ -76,7 +80,7 @@ def plot_grid(df, name, filename):
     axes[0].add_patch(plt.Rectangle(cell(chosen), 1, 1, fill=False, ec="red", lw=3))   # 1-SE choice
 
     plt.tight_layout()
-    plt.savefig(f"results/{filename}.pdf", bbox_inches="tight")
+    plt.savefig(f"figures/{filename}.pdf", bbox_inches="tight")
     plt.show()
 
     print(f"{name}, within 1 SE of best:\n", within[["lmbd", "gamma", "cv", "se"]].to_string(index=False))
@@ -87,14 +91,19 @@ within, lam, gamma = plot_grid(GRID, "Network (50 nodes)", "heatmap_MNIST")
 within_log, lam_log, gamma_log = plot_grid(GRID_LOG, "Logistic regression", "heatmap_MNIST_logistic")
 
 
+"""
+VALIDATION CURVE
+"""
+
+
 def plot_width(df_w, ref, filename):
 	# with assistance of Claude Opus 5.5 (October 2026)
-	# w/ prompt to enhance already plotted results
+	# w/ prompt to enhance already plotted results: mark standard error band and the chosen width
     best   = df_w.loc[df_w["cv"].idxmax()]
     within = df_w[df_w["cv"] >= best["cv"] - best["se"]]
     chosen = within.loc[within["width"].idxmin()]   # 1-SE fewest hidden nodes
 
-    fig, ax = plt.subplots(figsize=(4.5, 4.5))
+    fig, ax = plt.subplots(figsize=(3.4, 4.2))
     ax.errorbar(df_w["width"], df_w["cv"], yerr=df_w["se"], marker="o", capsize=3, label="CV accuracy ± SE", color = "k")
     ax.plot(df_w["width"], df_w["train"], marker="s", label="Training accuracy", color = "yellowgreen")
     ax.axhline(ref["cv"], color="gray", label="Logistic regression, CV accuracy")
@@ -105,9 +114,9 @@ def plot_width(df_w, ref, filename):
     ax.set_xscale("log")
     ax.set_xticks(df_w["width"]); ax.set_xticklabels(df_w["width"].astype(int))
     ax.set_xlabel("Hidden nodes"); ax.set_ylabel("Accuracy")
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=2, fontsize="small")
+    ax.legend(loc="lower center", bbox_to_anchor=(0.5, 1.1), ncol=1, fontsize="medium", frameon = False)
     plt.tight_layout()
-    plt.savefig(f"results/{filename}.pdf", bbox_inches="tight")
+    plt.savefig(f"figures/{filename}.pdf", bbox_inches="tight")
     plt.show()
     return int(chosen["width"])
 
@@ -115,6 +124,7 @@ WIDTH = pd.read_csv("results/valcurve_MNIST_width.csv")
 ref = GRID_LOG[(GRID_LOG["lmbd"] == lam_log) & (GRID_LOG["gamma"] == gamma_log)].iloc[0]
 width = plot_width(WIDTH, ref, "valcurve_MNIST_width")
 
+print(f"Chosen width from cross-validation: {width}")
 
 """
 TRAIN CHOSEN MODELS
@@ -132,39 +142,57 @@ cost_func = crossEntropy
 DigitsNet = NN(network_input_size, layer_output_sizes, activation_funcs, activation_ders, cost_func, costDer = None, norm = "l2", lam = lam)
 DigitsLogistic = NN(network_input_size, [10], [softmax], [None], cost_func, costDer = None, norm = "l2", lam = lam_log)
 
-# train (both own back propagation and classifier)
+# train
+t0 = time.perf_counter()
 history, num_epochs, layers = train(DigitsNet, X_train, targets_train, classification=True, method="adam", gamma=gamma, M=130, epochs=10, rho=0.99, beta1=0.9, beta2=0.999, eps=1e-8, tol=None, seed=2026)
-minimizeCost, trainCost, trainAcc = history["minimizeCost"], history["trainCost"], history["trainAcc"]
+time_net = time.perf_counter() - t0
+#minimizeCost, trainCost, trainAcc = history["minimizeCost"], history["trainCost"], history["trainAcc"]
 
+t0 = time.perf_counter()
 history_log, num_epochs_log, layers_log = train(DigitsLogistic, X_train, targets_train, classification=True, method="adam", gamma=gamma_log, M=130, epochs=10, rho=0.99, beta1=0.9, beta2=0.999, eps=1e-8, tol=None, seed=2026)
-minimizeCost_log, trainCost_log, trainAcc_log = history_log["minimizeCost"], history_log["trainCost"], history_log["trainAcc"]
+time_log = time.perf_counter() - t0
+#minimizeCost_log, trainCost_log, trainAcc_log = history_log["minimizeCost"], history_log["trainCost"], history_log["trainAcc"]
+
+print("TRAINING DONE")
+
+"""
+TRAINING CROSS ENTROPY AND TRAINING ACCURACY
+"""
 
 
+# baseline
 majority = np.bincount(y_train).argmax()
 baseline_acc = np.mean(y_test == majority)
 print(f"baseline (always guess {majority}): test accuracy {baseline_acc:.4f}")
 
-models = {
-    "logistic regression": {"net": DigitsLogistic, "history": history_log},
-    f"one hidden layer of {chosen_width}": {"net": DigitsNet, "history": history},
-}
-for name, m in models.items():
-    m["pred"] = np.argmax(m["net"].feedForward(X_test), axis=1)
-    m["n_params"] = sum(W.size + b.size for W, b in m["net"].layers)
-    m["test_acc"] = np.mean(m["pred"] == y_test)
-    print(f"{name}: {m['n_params']} parameters, final cost {m['history']['trainCost'][-1]:.4f}, "
-          f"test accuracy {m['test_acc']:.4f}")
 
-fig, ax = plt.subplots(1, 2, figsize=(9, 3.5))
-for name, col in zip(models, ("gray", "k")):
-    ax[0].semilogy(models[name]["history"]["trainCost"], color=col, label=name)
-    ax[1].plot(models[name]["history"]["trainAcc"], color=col, label=name)
-ax[0].set_xlabel("epoch"); ax[0].set_ylabel("training cross entropy"); ax[0].legend(fontsize=8)
-ax[1].set_xlabel("epoch"); ax[1].set_ylabel("training accuracy"); ax[1].legend(fontsize=8)
-ax[0].grid(True)
-ax[1].grid(True)
+# plot
+label_log = "logistic regression"
+label_net = f"one hidden layer of {chosen_width}"
+
+# training cost
+plt.figure(figsize=(3.3, 3.0))
+plt.semilogy(history_log["trainCost"], color="cornflowerblue", label=label_log)
+plt.semilogy(history["trainCost"], color="indianred", label=label_net)
+plt.xlabel("epoch")
+plt.ylabel("training cross entropy")
+plt.grid(True)
+plt.xlim(0,9)
 plt.tight_layout()
-plt.savefig(f"results/train_vs_epochs.pdf", bbox_inches="tight")
+plt.savefig("figures/train_cost_vs_epochs.pdf", bbox_inches="tight")
+plt.show()
+
+# training accuracy
+plt.figure(figsize=(6.0, 3.0))
+plt.plot(history_log["trainAcc"], color="cornflowerblue", label=label_log)
+plt.plot(history["trainAcc"], color="indianred", label=label_net)
+plt.xlabel("epoch")
+plt.ylabel("training accuracy")
+plt.legend(loc="upper left", bbox_to_anchor=(1.1, 1.0), ncol=1, fontsize="medium", frameon=False)
+plt.grid(True)
+plt.xlim(0,9)
+plt.tight_layout()
+plt.savefig("figures/train_acc_vs_epochs.pdf", bbox_inches="tight")
 plt.show()
 
 
@@ -172,43 +200,65 @@ plt.show()
 EVALUATE MODELS
 """
 
-n = len(y_test)
-net_name = f"one hidden layer of {chosen_width}"
-w = WIDTH[WIDTH["width"] == chosen_width].iloc[0]
+# table vals
+models = {
+    "logistic regression": {"net": DigitsLogistic, "history": history_log, "epochs": num_epochs_log, "time": time_log},
+    f"one hidden layer of {chosen_width}": {"net": DigitsNet, "history": history, "epochs": num_epochs, "time": time_net},
+}
 
-summary = pd.DataFrame({
-    "model":      ["baseline", "logistic regression", net_name],
-    "parameters": [0, models["logistic regression"]["n_params"], models[net_name]["n_params"]],
-    "CV":         [np.nan, ref["cv"], w["cv"]],
-    "CV SE":      [np.nan, ref["se"], w["se"]],
-    "test":       [baseline_acc, models["logistic regression"]["test_acc"], models[net_name]["test_acc"]],
-})
-summary["test"] = summary["test"].astype(float)
-summary["test SE"] = np.sqrt(summary["test"] * (1 - summary["test"]) / n)
+for name, m in models.items():
+    m["pred"] = np.argmax(m["net"].feedForward(X_test), axis=1)
+    m["n_params"] = sum(W.size + b.size for W, b in m["net"].layers)
+    m["test_acc"] = np.mean(m["pred"] == y_test)
+    print(f"{name}: {m['n_params']} parameters, final cost {m['history']['trainCost'][-1]:.4f}, "
+    	f"test accuracy {m['test_acc']:.4f}, {m['epochs']} epochs, training time {m['time']:.1f} s")
 
-print(summary.to_string(index=False, float_format="%.4f"))
-summary.to_csv("results/summary_MNIST.csv", index=False)
 
-# confusion matrix on the test set
-
-fig, ax = plt.subplots(figsize=(4.5, 4.5))
+# The following confusion matrix is by Claude, Opus 5.5 (November 2026)
+# w prompt to include more digits while keeping the axis labels readable and change the row-normalizez to percentages
+# in the prompt, my own code was pasted: 
+"""
+fig, ax = plt.subplots(figsize=(4.0, 4.0))
 skm.ConfusionMatrixDisplay.from_predictions(y_test, models[f"one hidden layer of {chosen_width}"]["pred"], values_format="d", cmap="GnBu", colorbar=False, ax=ax)
-plt.savefig("results/confusion_MNIST.pdf", bbox_inches="tight")
+plt.savefig("figures/confusion_MNIST.pdf", bbox_inches="tight")
+plt.show()
+
+fig, ax = plt.subplots(figsize=(4.0, 4.0))
+skm.ConfusionMatrixDisplay.from_predictions(y_test, models[f"one hidden layer of {chosen_width}"]["pred"], normalize="true", values_format=".2f", cmap="GnBu", colorbar=False, ax=ax)
+plt.savefig("figures/confusion_row_norm_MNIST.pdf", bbox_inches="tight")
+plt.show()
+"""
+pred = models[f"one hidden layer of {chosen_width}"]["pred"]
+label_size, tick_size, cell_size = 11, 9, 9.5 
+
+def style(ax):
+    ax.set_xlabel("Predicted label", fontsize=label_size)
+    ax.set_ylabel("True label", fontsize=label_size)
+    ax.tick_params(labelsize=tick_size)
+
+# counts
+fig, ax = plt.subplots(figsize=(4.0, 4.0))
+skm.ConfusionMatrixDisplay.from_predictions(y_test, pred, values_format="d", cmap="GnBu", colorbar=False, ax=ax, text_kw={"fontsize": cell_size})
+style(ax)
+plt.savefig("figures/confusion_MNIST.pdf", bbox_inches="tight")
+plt.show()
+
+# row-normalized, in percent
+cm = skm.confusion_matrix(y_test, pred, normalize="true") * 100
+fig, ax = plt.subplots(figsize=(4.0, 4.0))
+skm.ConfusionMatrixDisplay(cm).plot(values_format=".1f", cmap="GnBu", colorbar=False, ax=ax, text_kw={"fontsize": cell_size})
+style(ax)
+plt.savefig("figures/confusion_row_norm_MNIST.pdf", bbox_inches="tight")
 plt.show()
 
 
-# precision, recall, F1
 
-report = skm.classification_report(y_test, models[net_name]["pred"], output_dict=True)
+# precision, recall, F1
+report = skm.classification_report(y_test, models[f"one hidden layer of {chosen_width}"]["pred"], output_dict=True)
 per_digit = pd.DataFrame(report).T.loc[[str(d) for d in range(10)], ["precision", "recall", "f1-score", "support"]]
 
 print(per_digit.to_string(float_format="%.4f"))
 per_digit.to_csv("results/per_digit_MNIST.csv")
-
-
-
-
-
 
 
 

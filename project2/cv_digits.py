@@ -4,9 +4,9 @@ import pandas as pd
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import StratifiedKFold, GridSearchCV, train_test_split, validation_curve
-from utils import *
-from estimator import *
-from neural_network import NN 
+from src.utils import *
+from src.estimator import *
+from src.neural_network import NN
 
 """
 Cross-validating a FFNN for classifying digits
