@@ -2,7 +2,8 @@
 
 By Elvira Boström, Catherine Hughes and Vanii Hsin-Ni Yao
 
-The full report is given as a pdf-file in the same directory as this README.
+The full report is given as a pdf-file "Feed-Forward Neural Networks versus Linear Models: Regression of the Runge
+Function and Classification of Handwritten Digits" in the same directory as this README.
 
 ## Prerequisites
 Running this project requires scikit-learn and jax, which can be installed as described on their GitHub sites. It also requires Matplotlib, NumPy, Pandas, Seaborn and Pathlib. 
