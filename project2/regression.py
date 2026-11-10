@@ -10,8 +10,8 @@ import jax
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 
-from utils import *
-from estimator import Regressor
+from src.utils import *
+from src.estimator import Regressor
 
 # Create results directory
 os.makedirs("figures", exist_ok=True)
@@ -32,7 +32,7 @@ def setup_plot():
     plt.yticks(fontsize=10)
     plt.grid(True)
 
-"""
+
 
 rng = np.random.default_rng(2026)
 n = 100
@@ -157,7 +157,7 @@ for arch_name, hidden_dims in architectures:
     plt.legend(fontsize=10)
     plt.savefig(filename, bbox_inches="tight")
     plt.close()
-"""
+
 
 # ===============================================================================================================
 # Cross-Validation
@@ -288,15 +288,15 @@ def load_and_train_model(csv_path, norm_type, X_train, Y_train_scaled):
     return model
 
 # Load and train models from CSV files
-model_l1 = load_and_train_model("results/gridsearch_runge_l1.csv", "l1", X_train, Y_train_scaled)
-model_l2 = load_and_train_model("results/gridsearch_runge_l2.csv", "l2", X_train, Y_train_scaled)
+model_l1 = load_and_train_model("../results/gridsearch_runge_l1.csv", "l1", X_train, Y_train_scaled)
+model_l2 = load_and_train_model("../results/gridsearch_runge_l2.csv", "l2", X_train, Y_train_scaled)
 
 # Evaluate L1 on test set
-test_mse_l1 = MSE(model_l1.predict(X_test) + Y_mean, Y_test)
+test_mse_l1 = MSE(model_l1.predict(X_test) + Y_mean, Y_test.ravel())
 print(f"\nTest MSE (L1): {test_mse_l1:.5f}")
 
 # Evaluate L2 on test set
-test_mse_l2 = MSE(model_l2.predict(X_test) + Y_mean, Y_test)
+test_mse_l2 = MSE(model_l2.predict(X_test) + Y_mean, Y_test.ravel())
 print(f"Test MSE (L2): {test_mse_l2:.5f}")
 
 # Fine grid for visualization
@@ -326,8 +326,8 @@ plt.close()
 # Standalone fit with gamma = 0.001
 # ===============================================================================================================
 
-df_l1 = pd.read_csv("results/gridsearch_runge_l1.csv")
-df_l2 = pd.read_csv("results/gridsearch_runge_l2.csv")
+df_l1 = pd.read_csv("../results/gridsearch_runge_l1.csv")
+df_l2 = pd.read_csv("../results/gridsearch_runge_l2.csv")
 
 # Extract best lambda for gamma = 0.001 from L1 results
 df_l1_001 = df_l1[df_l1["gamma"] == 0.001]
